@@ -1,0 +1,6 @@
+*
+!*/
+!.gitignore
+!Inc/asciihex8X16.h
+!Inc/lcd_22.h
+!Src/lcd_22.c
