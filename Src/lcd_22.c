@@ -278,8 +278,11 @@ unsigned char ascii[]= {
 
 /* Глобальные переменные */
 //Интерфейсы SPI для коммуникации с дисплеем и тачскрином
+#ifndef TFT_SOFTSPI
 SPI_HandleTypeDef *_displaySPI;
 SPI_HandleTypeDef *_touchSPI;
+#endif
+
 //Размеры дисплея по горизонтали и вертикали (меняются при изменении ориентации экрана)
 uint16_t TFT_MAX_X = 320;
 uint16_t TFT_MAX_Y = 240;
@@ -299,8 +302,13 @@ void TFT_reset(void) {
 	HAL_Delay(1);
 }
 //Инициализация дисплея
+#ifndef TFT_SOFTSPI
 void TFT_init(SPI_HandleTypeDef *displaySPI) {
 	_displaySPI = displaySPI;
+#endif
+#ifdef TFT_SOFTSPI
+void TFT_init(void) {
+#endif
 	//Общение на шине именно с дисплеем
 	TFT_CS_Reset;
 	//Аппаратная перезагрузка дисплея
@@ -311,8 +319,8 @@ void TFT_init(SPI_HandleTypeDef *displaySPI) {
 	/* Настройки питания */  	
 	TFT_sendCmd(0x100, 0x0000);		//Дисплей выключен
 	TFT_sendCmd(0x101, 0x0000);		//Тактирование выключено 
-	TFT_sendCmd(0x102, 0x3100); 		//Настройка частот преобразователей
-	TFT_sendCmd(0x103, 0xe200); 		//Настройка напряжений
+	TFT_sendCmd(0x102, 0x3100); 	//Настройка частот преобразователей
+	TFT_sendCmd(0x103, 0xe200); 	//Настройка напряжений
 	TFT_sendCmd(0x110, 0x009d);		//Настройка апмлитуд переменного напряжения матрицы 
 	TFT_sendCmd(0x111, 0x0022);		//Настройка тока 
 	TFT_sendCmd(0x100, 0x0120);		//Включение операционных усилителей и запуск генератора градационного напряжения
@@ -320,7 +328,7 @@ void TFT_init(SPI_HandleTypeDef *displaySPI) {
 	TFT_sendCmd(0x100, 0x3120);		//Включение питания матрицы и всего остального
 	HAL_Delay(80);
 	/* Управление дисплеем */   
-	TFT_sendCmd(0x001, 0x0100); 		//Ориентация дисплея: 0x0100 - сверху вниз, 0x0000 - снизу вверх. Можно отзеркалить изображение 	
+	TFT_sendCmd(0x001, 0x0100); 	//Ориентация дисплея: 0x0100 - сверху вниз, 0x0000 - снизу вверх. Можно отзеркалить изображение 	
 	TFT_sendCmd(0x002, 0x0000);		//Установка формы сигнала драйвера
 	TFT_sendCmd(0x003, 0x1230);		//Режим ввода
 	//TODO: Команду установки ориентации дисплея
@@ -455,9 +463,21 @@ void LCD_test(void)
 //Функция отправки 16 бит данных
 void TFT_sendData(uint16_t data) {
 	//Буффер данных для отправки
-	uint8_t buff[2] = {data>>8, (uint8_t)data};
 	//Отправка данных по SPI
+	#ifndef TFT_SOFTSPI
+	uint8_t buff[2] = {data>>8, (uint8_t)data};
 	HAL_SPI_Transmit(_displaySPI, (uint8_t *)buff, 2, 0xFF);
+	#endif
+	#ifdef TFT_SOFTSPI
+	uint16_t mask = 32768;
+	for (uint8_t i = 0; i < 16; i++) {
+		(data & (mask)) ? TFT_MOSI_Set : TFT_MOSI_Reset;
+		TFT_SCK_Set;
+		TFT_SCK_Reset;
+		mask >>= 1;
+	}
+	#endif
+	
 }
 //Функция отправки команды
 void TFT_sendCmd(uint16_t cmd, uint16_t data) {
@@ -606,7 +626,7 @@ uint16_t get_touch_data(uint16_t cmd)
 	SSPBUF = 0;
 	while(!SSPIF);
 	SSPIF=0;*/
-	HAL_SPI_Receive(_touchSPI, (uint8_t *)buff, 2, 0xFF);
+	//HAL_SPI_Receive(_touchSPI, (uint8_t *)buff, 2, 0xFF);
 
 	return ( ((uint16_t)buff[0])<<5 | ((uint16_t)buff[1])>>3);
 }

@@ -32,6 +32,17 @@
 #define TFT_data					HAL_GPIO_WritePin(D_RS_GPIO_Port, D_RS_Pin, GPIO_PIN_SET)
 #define TFT_index					HAL_GPIO_WritePin(D_RS_GPIO_Port, D_RS_Pin, GPIO_PIN_RESET)
 
+//Если вы хотите использовать программный SPI, то раскомментируйте это
+//#define TFT_SOFTSPI
+
+//Если вы используете аппаратный SPI, то модифицировать не обязательно
+#ifdef TFT_SOFTSPI
+#define TFT_MOSI_Set		HAL_GPIO_WritePin(SPI_MOSI_GPIO_Port, SPI_MOSI_Pin, GPIO_PIN_SET)
+#define TFT_MOSI_Reset	HAL_GPIO_WritePin(SPI_MOSI_GPIO_Port, SPI_MOSI_Pin, GPIO_PIN_RESET)
+#define TFT_SCK_Set			HAL_GPIO_WritePin(SPI_SCK_GPIO_Port, SPI_SCK_Pin, GPIO_PIN_SET)
+#define TFT_SCK_Reset		HAL_GPIO_WritePin(SPI_SCK_GPIO_Port, SPI_SCK_Pin, GPIO_PIN_RESET)
+#endif
+
 //Преобразование RGB в 16-ти битный формат 565
 #define	TFT_RGB(R, G, B)	(((B >> 3)) | ((G >> 2) << 5) | ((R >> 3) << 11))
 //TODO: Разобраться что за макросы
@@ -77,7 +88,12 @@ void TFT_sendData(uint16_t data);
 //Функция отправки команды
 void TFT_sendCmd(uint16_t cmd, uint16_t data) ;
 //Инициализация дисплея
-void TFT_init(SPI_HandleTypeDef *_displaySPI);
+#ifndef TFT_SOFTSPI
+void TFT_init(SPI_HandleTypeDef *displaySPI);
+#endif
+#ifdef TFT_SOFTSPI
+void TFT_init(void);
+#endif
 //Залитие дисплея указанным цветом
 void TFT_fill(uint16_t color);
 //Очистка дисплея (залитие белым)
