@@ -326,58 +326,57 @@ void TFT_init(SPI_HandleTypeDef *displaySPI) {
 	//0xXXX0 - ввод по короткой стороне (по ширине), 0xXXX8 - по длинной (по длине)
 	//0xXXnX - инкремент/декремент по длине и ширине
 	post_cmd(0x006, 0x0000);		//Контроль движения изображения
-	post_cmd(0x007, 0x0101);		//
-	post_cmd( 0x008, 0x0808 );
-	post_cmd( 0x009, 0x0000 );
-	post_cmd( 0x00b, 0x0000 );
-	post_cmd( 0x00c, 0x0000 );
-	post_cmd( 0x00d, 0x0018 );
+	post_cmd(0x007, 0x0101);		//Выключение дисплея как такогого
+	post_cmd(0x008, 0x0808);		//Настройка рамок (?)
+	post_cmd(0x009, 0x0000);		//Настройка сканирования (?)
+	post_cmd(0x00b, 0x0000);		//Настройка количества цветов дисплея. Переключение между 8 цветами и 262k
+	post_cmd(0x00c, 0x0000);		//Настройка интерфейса RGB 
+	post_cmd(0x00d, 0x0017);		//Настройка частоты обновления кадров. 0xXX10 - максимальная, 0xXX1F - минимальная частота
 	/* LTPS control settings */   
-	post_cmd( 0x012, 0x0000 );
-	post_cmd( 0x013, 0x0000 );
-	post_cmd( 0x018, 0x0000 );
-	post_cmd( 0x019, 0x0000 );
+	post_cmd(0x012, 0x0000);
+	post_cmd(0x013, 0x0000);	
+	post_cmd(0x018, 0x0000);
+	post_cmd(0x019, 0x0000);
 
-	post_cmd( 0x203, 0x0000 );
-	post_cmd( 0x204, 0x0000 );
-
-	post_cmd( 0x210, 0x0000 );
-	post_cmd( 0x211, 0x00ef );
-	post_cmd( 0x212, 0x0000 );
-	post_cmd( 0x213, 0x013f );
-	post_cmd( 0x214, 0x0000 );
-	post_cmd( 0x215, 0x0000 );
-	post_cmd( 0x216, 0x0000 );
-	post_cmd( 0x217, 0x0000 );
-
-	// Gray scale settings
-	post_cmd( 0x300, 0x5343);
-	post_cmd( 0x301, 0x1021);
-	post_cmd( 0x302, 0x0003);
-	post_cmd( 0x303, 0x0011);
-	post_cmd( 0x304, 0x050a);
-	post_cmd( 0x305, 0x4342);
-	post_cmd( 0x306, 0x1100);
-	post_cmd( 0x307, 0x0003);
-	post_cmd( 0x308, 0x1201);
-	post_cmd( 0x309, 0x050a);
-
-	/* RAM access settings */ 
-	post_cmd( 0x400, 0x4027 );
-	post_cmd( 0x401, 0x0000 );
-	post_cmd( 0x402, 0x0000 );	/* First screen drive position (1) */   	
-	post_cmd( 0x403, 0x013f );	/* First screen drive position (2) */   	
-	post_cmd( 0x404, 0x0000 );
-
-	post_cmd( 0x200, 0x0000 );
-	post_cmd( 0x201, 0x0000 );
+	post_cmd(0x203, 0x0000);		//Маска записи в GRAM
+	post_cmd(0x204, 0x0000);		//Маска записи в GRAM
+	/* Выделение активной области дисплея, в которую будут отправляться данные */
+	post_cmd(0x210, 0x0000);		//Начало по горизонтали
+	post_cmd(0x211, 0x00ef);		//Конец по горизонтали
+	post_cmd(0x212, 0x0000);		//Начало по вертикали
+	post_cmd(0x213, 0x013f);		//Конец по вертикали
+	/* Выделение активной области дисплея для движущегося изображения */
+	post_cmd(0x214, 0x0000);		//Начало по горизонтали
+	post_cmd(0x215, 0x0000);		//Конец по горизонтали
+	post_cmd(0x216, 0x0000);		//Начало по вертикали
+	post_cmd(0x217, 0x0000);		//Конец по вертикали
+	/* Настройка градации серого */
+	post_cmd(0x300, 0x5343);
+	post_cmd(0x301, 0x1021);
+	post_cmd(0x302, 0x0003);
+	post_cmd(0x303, 0x0011);
+	post_cmd(0x304, 0x050a);
+	post_cmd(0x305, 0x4342);
+	post_cmd(0x306, 0x1100);
+	post_cmd(0x307, 0x0003);
+	post_cmd(0x308, 0x1201);
+	post_cmd(0x309, 0x050a);
+	/* Настройка доступа к RAM */ 
+	post_cmd(0x400, 0x4027);
+	post_cmd(0x401, 0x0000);
+	post_cmd(0x402, 0x0000);		/* First screen drive position (1) */   	
+	post_cmd(0x403, 0x013f);		/* First screen drive position (2) */   	
+	post_cmd(0x404, 0x0000);
+	/* Установка текущего пикселя */
+	post_cmd(0x200, 0x0000);		//По горизонтали
+	post_cmd(0x201, 0x0000);		//По вертикали
 	
-	post_cmd( 0x100, 0x7120 );
-	post_cmd( 0x007, 0x0103 );
-	HAL_Delay( 10 );
-	post_cmd( 0x007, 0x0113 );
+	post_cmd(0x100, 0x7120);		//Включение питания дисплея
+	post_cmd(0x007, 0x0103);		//Разрешение изображения
+	HAL_Delay(10);
+	post_cmd(0x007, 0x0113);		//Включение ключей
 
-	TFT_CS_Set;
+	TFT_CS_Set; //Поднятие CS, т.к. общение с дисплеем закончено
 }
 //Очистка дисплея (залитие белым)
 void TFT_clear(void) {
