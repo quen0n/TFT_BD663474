@@ -40,6 +40,7 @@
 #define DOT_WIDTH 4
 #define TOUCH_CMD_X 		0xD0
 #define TOUCH_CMD_Y 		0x90
+#define TOUCH_MAX_CACHE 8
 
 //Цвета
 enum COLOR{
@@ -68,10 +69,13 @@ typedef struct xy {
 	uint16_t y;
 } xy_t;
 
-#define TOUCH_MAX_CACHE 8
 /* Функции работы с дисплеем */
 //Аппаратная перезагрузка дисплея
 void TFT_reset(void);
+//Функция отправки 16 бит данных
+void TFT_sendData(uint16_t data);
+//Функция отправки команды
+void TFT_sendCmd(uint16_t cmd, uint16_t data) ;
 //Инициализация дисплея
 void TFT_init(SPI_HandleTypeDef *_displaySPI);
 //Залитие дисплея указанным цветом

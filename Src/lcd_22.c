@@ -306,76 +306,76 @@ void TFT_init(SPI_HandleTypeDef *displaySPI) {
 	//Аппаратная перезагрузка дисплея
 	TFT_reset();
 	
-	post_cmd(0x000,0x0001); //Запуск осциллятора
+	TFT_sendCmd(0x000,0x0001); //Запуск осциллятора
 	HAL_Delay(10);
 	/* Настройки питания */  	
-	post_cmd(0x100, 0x0000);		//Дисплей выключен
-	post_cmd(0x101, 0x0000);		//Тактирование выключено 
-	post_cmd(0x102, 0x3100); 		//Настройка частот преобразователей
-	post_cmd(0x103, 0xe200); 		//Настройка напряжений
-	post_cmd(0x110, 0x009d);		//Настройка апмлитуд переменного напряжения матрицы 
-	post_cmd(0x111, 0x0022);		//Настройка тока 
-	post_cmd(0x100, 0x0120);		//Включение операционных усилителей и запуск генератора градационного напряжения
+	TFT_sendCmd(0x100, 0x0000);		//Дисплей выключен
+	TFT_sendCmd(0x101, 0x0000);		//Тактирование выключено 
+	TFT_sendCmd(0x102, 0x3100); 		//Настройка частот преобразователей
+	TFT_sendCmd(0x103, 0xe200); 		//Настройка напряжений
+	TFT_sendCmd(0x110, 0x009d);		//Настройка апмлитуд переменного напряжения матрицы 
+	TFT_sendCmd(0x111, 0x0022);		//Настройка тока 
+	TFT_sendCmd(0x100, 0x0120);		//Включение операционных усилителей и запуск генератора градационного напряжения
 	HAL_Delay(20);
-	post_cmd(0x100, 0x3120);		//Включение питания матрицы и всего остального
+	TFT_sendCmd(0x100, 0x3120);		//Включение питания матрицы и всего остального
 	HAL_Delay(80);
 	/* Управление дисплеем */   
-	post_cmd(0x001, 0x0100); 		//Ориентация дисплея: 0x0100 - сверху вниз, 0x0000 - снизу вверх. Можно отзеркалить изображение 	
-	post_cmd(0x002, 0x0000);		//Установка формы сигнала драйвера
-	post_cmd(0x003, 0x1230);		//Режим ввода
+	TFT_sendCmd(0x001, 0x0100); 		//Ориентация дисплея: 0x0100 - сверху вниз, 0x0000 - снизу вверх. Можно отзеркалить изображение 	
+	TFT_sendCmd(0x002, 0x0000);		//Установка формы сигнала драйвера
+	TFT_sendCmd(0x003, 0x1230);		//Режим ввода
 	//TODO: Команду установки ориентации дисплея
 	//0xXXX0 - ввод по короткой стороне (по ширине), 0xXXX8 - по длинной (по длине)
 	//0xXXnX - инкремент/декремент по длине и ширине
-	post_cmd(0x006, 0x0000);		//Контроль движения изображения
-	post_cmd(0x007, 0x0101);		//Выключение дисплея как такогого
-	post_cmd(0x008, 0x0808);		//Настройка рамок (?)
-	post_cmd(0x009, 0x0000);		//Настройка сканирования (?)
-	post_cmd(0x00b, 0x0000);		//Настройка количества цветов дисплея. Переключение между 8 цветами и 262k
-	post_cmd(0x00c, 0x0000);		//Настройка интерфейса RGB 
-	post_cmd(0x00d, 0x0017);		//Настройка частоты обновления кадров. 0xXX10 - максимальная, 0xXX1F - минимальная частота
+	TFT_sendCmd(0x006, 0x0000);		//Контроль движения изображения
+	TFT_sendCmd(0x007, 0x0101);		//Выключение дисплея как такогого
+	TFT_sendCmd(0x008, 0x0808);		//Настройка рамок (?)
+	TFT_sendCmd(0x009, 0x0000);		//Настройка сканирования (?)
+	TFT_sendCmd(0x00b, 0x0000);		//Настройка количества цветов дисплея. Переключение между 8 цветами и 262k
+	TFT_sendCmd(0x00c, 0x0000);		//Настройка интерфейса RGB 
+	TFT_sendCmd(0x00d, 0x0017);		//Настройка частоты обновления кадров. 0xXX10 - максимальная, 0xXX1F - минимальная частота
 	/* LTPS control settings */   
-	post_cmd(0x012, 0x0000);
-	post_cmd(0x013, 0x0000);	
-	post_cmd(0x018, 0x0000);
-	post_cmd(0x019, 0x0000);
+	TFT_sendCmd(0x012, 0x0000);
+	TFT_sendCmd(0x013, 0x0000);	
+	TFT_sendCmd(0x018, 0x0000);
+	TFT_sendCmd(0x019, 0x0000);
 
-	post_cmd(0x203, 0x0000);		//Маска записи в GRAM
-	post_cmd(0x204, 0x0000);		//Маска записи в GRAM
+	TFT_sendCmd(0x203, 0x0000);		//Маска записи в GRAM
+	TFT_sendCmd(0x204, 0x0000);		//Маска записи в GRAM
 	/* Выделение активной области дисплея, в которую будут отправляться данные */
-	post_cmd(0x210, 0x0000);		//Начало по горизонтали
-	post_cmd(0x211, 0x00ef);		//Конец по горизонтали
-	post_cmd(0x212, 0x0000);		//Начало по вертикали
-	post_cmd(0x213, 0x013f);		//Конец по вертикали
+	TFT_sendCmd(0x210, 0x0000);		//Начало по горизонтали
+	TFT_sendCmd(0x211, 0x00ef);		//Конец по горизонтали
+	TFT_sendCmd(0x212, 0x0000);		//Начало по вертикали
+	TFT_sendCmd(0x213, 0x013f);		//Конец по вертикали
 	/* Выделение активной области дисплея для движущегося изображения */
-	post_cmd(0x214, 0x0000);		//Начало по горизонтали
-	post_cmd(0x215, 0x0000);		//Конец по горизонтали
-	post_cmd(0x216, 0x0000);		//Начало по вертикали
-	post_cmd(0x217, 0x0000);		//Конец по вертикали
+	TFT_sendCmd(0x214, 0x0000);		//Начало по горизонтали
+	TFT_sendCmd(0x215, 0x0000);		//Конец по горизонтали
+	TFT_sendCmd(0x216, 0x0000);		//Начало по вертикали
+	TFT_sendCmd(0x217, 0x0000);		//Конец по вертикали
 	/* Настройка градации серого */
-	post_cmd(0x300, 0x5343);
-	post_cmd(0x301, 0x1021);
-	post_cmd(0x302, 0x0003);
-	post_cmd(0x303, 0x0011);
-	post_cmd(0x304, 0x050a);
-	post_cmd(0x305, 0x4342);
-	post_cmd(0x306, 0x1100);
-	post_cmd(0x307, 0x0003);
-	post_cmd(0x308, 0x1201);
-	post_cmd(0x309, 0x050a);
+	TFT_sendCmd(0x300, 0x5343);
+	TFT_sendCmd(0x301, 0x1021);
+	TFT_sendCmd(0x302, 0x0003);
+	TFT_sendCmd(0x303, 0x0011);
+	TFT_sendCmd(0x304, 0x050a);
+	TFT_sendCmd(0x305, 0x4342);
+	TFT_sendCmd(0x306, 0x1100);
+	TFT_sendCmd(0x307, 0x0003);
+	TFT_sendCmd(0x308, 0x1201);
+	TFT_sendCmd(0x309, 0x050a);
 	/* Настройка доступа к RAM */ 
-	post_cmd(0x400, 0x4027);
-	post_cmd(0x401, 0x0000);
-	post_cmd(0x402, 0x0000);		/* First screen drive position (1) */   	
-	post_cmd(0x403, 0x013f);		/* First screen drive position (2) */   	
-	post_cmd(0x404, 0x0000);
+	TFT_sendCmd(0x400, 0x4027);
+	TFT_sendCmd(0x401, 0x0000);
+	TFT_sendCmd(0x402, 0x0000);		/* First screen drive position (1) */   	
+	TFT_sendCmd(0x403, 0x013f);		/* First screen drive position (2) */   	
+	TFT_sendCmd(0x404, 0x0000);
 	/* Установка текущего пикселя */
-	post_cmd(0x200, 0x0000);		//По горизонтали
-	post_cmd(0x201, 0x0000);		//По вертикали
+	TFT_sendCmd(0x200, 0x0000);		//По горизонтали
+	TFT_sendCmd(0x201, 0x0000);		//По вертикали
 	
-	post_cmd(0x100, 0x7120);		//Включение питания дисплея
-	post_cmd(0x007, 0x0103);		//Разрешение изображения
+	TFT_sendCmd(0x100, 0x7120);		//Включение питания дисплея
+	TFT_sendCmd(0x007, 0x0103);		//Разрешение изображения
 	HAL_Delay(10);
-	post_cmd(0x007, 0x0113);		//Включение ключей
+	TFT_sendCmd(0x007, 0x0113);		//Включение ключей
 
 	TFT_CS_Set; //Поднятие CS, т.к. общение с дисплеем закончено
 }
@@ -383,20 +383,20 @@ void TFT_init(SPI_HandleTypeDef *displaySPI) {
 void TFT_fill(uint16_t color) {
 	TFT_CS_Reset;	//Общение на шине именно с дисплеем
 
-	post_cmd(0x210,0x00);
-	post_cmd(0x212,0x0000);
-	post_cmd(0x211,0xEF);
-	post_cmd(0x213,0x013F);
+	TFT_sendCmd(0x210,0x00);
+	TFT_sendCmd(0x212,0x0000);
+	TFT_sendCmd(0x211,0xEF);
+	TFT_sendCmd(0x213,0x013F);
 	
-	post_cmd(0x200,0x0000);
-	post_cmd(0x201,0x0000);
+	TFT_sendCmd(0x200,0x0000);
+	TFT_sendCmd(0x201,0x0000);
 
 	TFT_index;
-	post_data(0x202);
+	TFT_sendData(0x202);
 	TFT_data;
 	
 	for (uint32_t i = TFT_MAX_X*TFT_MAX_Y; i != 0; i--) {
-		post_data(color);
+		TFT_sendData(color);
 	}
 	TFT_CS_Set; //Поднятие CS, т.к. общение с дисплеем закончено
 }
@@ -408,62 +408,67 @@ void LCD_test(void)
 
 	TFT_CS_Reset;	
 
-	post_cmd(0x210,0x00);
-	post_cmd(0x212,0x0000);
-	post_cmd(0x211,0xEF);
-	post_cmd(0x213,0x013F);
+	TFT_sendCmd(0x210,0x00);
+	TFT_sendCmd(0x212,0x0000);
+	TFT_sendCmd(0x211,0xEF);
+	TFT_sendCmd(0x213,0x013F);
 	
-	post_cmd(0x200,0x0000);
-	post_cmd(0x201,0x0000);
+	TFT_sendCmd(0x200,0x0000);
+	TFT_sendCmd(0x201,0x0000);
 
 	TFT_index;
-	post_data(0x202);
+	TFT_sendData(0x202);
 	TFT_data;
 	for(n=0;n<16;n++)
 	{
 	    temp=colorfol[n];
 		for(num=20*240;num>0;num--)
 		{
-			post_data(temp);
+			TFT_sendData(temp);
 		}
 	}
 /*	for(n=0;n<1;n++)
 	{
-		post_cmd(0x210,0x00);
-		post_cmd(0x212,0x0000);
-		post_cmd(0x211,0xEF);
-		post_cmd(0x213,0x013F);
+		TFT_sendCmd(0x210,0x00);
+		TFT_sendCmd(0x212,0x0000);
+		TFT_sendCmd(0x211,0xEF);
+		TFT_sendCmd(0x213,0x013F);
 
-		post_cmd(0x200,0x0000);
-		post_cmd(0x201,0x0000);
+		TFT_sendCmd(0x200,0x0000);
+		TFT_sendCmd(0x201,0x0000);
 		
 		TFT_index();
-		post_data(0x202);
+		TFT_sendData(0x202);
 		TFT_data();
 	    temp=colorfol[n];
 		for(i=0;i<240;i++)
 		{
 			for(num=0;num<320;num++)
 			{
-		  		post_data(temp);
+		  		TFT_sendData(temp);
 			}
 		}
 	//	HAL_Delay(50);
 	}*/
 	TFT_CS_Set;
 }
-
-void post_data(uint16_t data) {
+//Функция отправки 16 бит данных
+void TFT_sendData(uint16_t data) {
+	//Буффер данных для отправки
 	uint8_t buff[2] = {data>>8, (uint8_t)data};
+	//Отправка данных по SPI
 	HAL_SPI_Transmit(_displaySPI, (uint8_t *)buff, 2, 0xFF);
 }
-
-void post_cmd(uint16_t index, uint16_t cmd)
-{
+//Функция отправки команды
+void TFT_sendCmd(uint16_t cmd, uint16_t data) {
+	//Установка RS в режим отправки команд
 	TFT_index;
-	post_data(index);
+	//Отправка команды
+	TFT_sendData(cmd);
+	//Установка RS в режим отправки данных
 	TFT_data;
-	post_data(cmd);
+	//Отправка данных
+	TFT_sendData(data);
 }
 
 void DisplayChar(uint8_t casc,uint8_t postion_x,uint8_t postion_y)
@@ -472,15 +477,15 @@ void DisplayChar(uint8_t casc,uint8_t postion_x,uint8_t postion_y)
 	uint8_t *p;
 	
 	TFT_CS_Reset;
-	post_cmd(0x210,postion_x*8); 	//x start point
-	post_cmd(0x212,postion_y*16); 	//y start point
-	post_cmd(0x211,postion_x*8+7);	//x end point
-	post_cmd(0x213,postion_y*16+15);	//y end point
-	post_cmd(0x200,postion_x*8);	
-	post_cmd(0x201,postion_y*16);
+	TFT_sendCmd(0x210,postion_x*8); 	//x start point
+	TFT_sendCmd(0x212,postion_y*16); 	//y start point
+	TFT_sendCmd(0x211,postion_x*8+7);	//x end point
+	TFT_sendCmd(0x213,postion_y*16+15);	//y end point
+	TFT_sendCmd(0x200,postion_x*8);	
+	TFT_sendCmd(0x201,postion_y*16);
 	
 	TFT_index;
-	post_data(0x202);
+	TFT_sendData(0x202);
 	TFT_data;
 	p=ascii;
 	p+=casc*16;
@@ -491,11 +496,11 @@ void DisplayChar(uint8_t casc,uint8_t postion_x,uint8_t postion_y)
 		{
 			if(b&0x80)
 			{
-				post_data(TFT_COLOR_Black);
+				TFT_sendData(TFT_COLOR_Black);
 			}
 			else
 			{
-				post_data(TFT_COLOR_Yellow);
+				TFT_sendData(TFT_COLOR_Yellow);
 			}
 			b=b<<1;
 			
@@ -510,16 +515,16 @@ void DisplayChar_Reverse(uint8_t casc,uint8_t postion_x,uint8_t postion_y)
 	uint8_t *p;
 	
 	TFT_CS_Reset;
-	post_cmd(0x210,postion_x*8); 	//x start point
-	post_cmd(0x212,postion_y*16); 	//y start point
-	post_cmd(0x211,postion_x*8+7);	//x end point
-	post_cmd(0x213,postion_y*16+15);	//y end point
+	TFT_sendCmd(0x210,postion_x*8); 	//x start point
+	TFT_sendCmd(0x212,postion_y*16); 	//y start point
+	TFT_sendCmd(0x211,postion_x*8+7);	//x end point
+	TFT_sendCmd(0x213,postion_y*16+15);	//y end point
 
-	post_cmd(0x200,postion_x*8);	
-	post_cmd(0x201,postion_y*16);
+	TFT_sendCmd(0x200,postion_x*8);	
+	TFT_sendCmd(0x201,postion_y*16);
 	
 	TFT_index;
-	post_data(0x202);
+	TFT_sendData(0x202);
 	TFT_data;
 	p=ascii;
 	p+=casc*16;
@@ -530,11 +535,11 @@ void DisplayChar_Reverse(uint8_t casc,uint8_t postion_x,uint8_t postion_y)
 		{
 			if(b&0x01)
 			{
-				post_data(TFT_COLOR_Black);
+				TFT_sendData(TFT_COLOR_Black);
 			}
 			else
 			{
-				post_data(TFT_COLOR_Yellow);
+				TFT_sendData(TFT_COLOR_Yellow);
 			}
 			b=b>>1;
 			
@@ -674,23 +679,23 @@ uint8_t draw_lcd(void)
 	
 	touch_counter--;
 
-	post_cmd(0x210,touch_xy_buffer[touch_rd_index].x);
-	post_cmd(0x212,touch_xy_buffer[touch_rd_index].y);
-	post_cmd(0x211,touch_xy_buffer[touch_rd_index].x+(DOT_WIDTH-1));
-	post_cmd(0x213,touch_xy_buffer[touch_rd_index].y+(DOT_WIDTH-1));
+	TFT_sendCmd(0x210,touch_xy_buffer[touch_rd_index].x);
+	TFT_sendCmd(0x212,touch_xy_buffer[touch_rd_index].y);
+	TFT_sendCmd(0x211,touch_xy_buffer[touch_rd_index].x+(DOT_WIDTH-1));
+	TFT_sendCmd(0x213,touch_xy_buffer[touch_rd_index].y+(DOT_WIDTH-1));
 	if(touch_rd_index < (TOUCH_MAX_CACHE-1)){
 		touch_rd_index++;
 	}else{
 		touch_rd_index = 0;
 	}
-	//post_cmd(0x0005,0x0010);
+	//TFT_sendCmd(0x0005,0x0010);
 
 	TFT_index;
-	post_data(0x202);
+	TFT_sendData(0x202);
 	TFT_data;
 	for(n=0; n< (DOT_WIDTH*DOT_WIDTH); n++)
 	{
-		post_data(TFT_COLOR_Black);
+		TFT_sendData(TFT_COLOR_Black);
 	}
 	TFT_CS_Set;
 	return 1;
