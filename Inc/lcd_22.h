@@ -32,20 +32,36 @@
 #define TFT_data					HAL_GPIO_WritePin(D_RS_GPIO_Port, D_RS_Pin, GPIO_PIN_SET)
 #define TFT_index					HAL_GPIO_WritePin(D_RS_GPIO_Port, D_RS_Pin, GPIO_PIN_RESET)
 
+//Преобразование RGB в 16-ти битный формат 565
+#define	TFT_RGB(R, G, B)	(((B >> 3)) | ((G >> 2) << 5) | ((R >> 3) << 11))
 //TODO: Разобраться что за макросы
 #define SAMP_COUNT				5
 #define SAMP_THRESHOLD		5
-
+#define DOT_WIDTH 4
 #define TOUCH_CMD_X 		0xD0
 #define TOUCH_CMD_Y 		0x90
-/* Цвета */
-//TODO: Больше цветов
-#define COLOR_YELLOW 		0xFFE0
-#define COLOR_BLACK 		0x0000
-#define COLOR_WHITE 		0xFFFF
-#define COLOR_INIT 			COLOR_YELLOW
 
-#define DOT_WIDTH 4
+//Цвета
+enum COLOR{
+	TFT_COLOR_Black 					= TFT_RGB(0, 0, 0),
+	TFT_COLOR_Gray						= TFT_RGB(24, 24, 24),
+	TFT_COLOR_Silver					= TFT_RGB(80, 80, 80),
+	TFT_COLOR_White						= TFT_RGB(255, 255, 255),
+	TFT_COLOR_Fuchsia					= TFT_RGB(255, 0, 255),
+	TFT_COLOR_Purple					= TFT_RGB(64, 0, 64),
+	TFT_COLOR_Red							= TFT_RGB(255, 0, 0),
+	TFT_COLOR_Maroon					= TFT_RGB(64, 0, 0),
+	TFT_COLOR_Yellow					= TFT_RGB(255, 255, 0),
+	TFT_COLOR_Orange					= TFT_RGB(128, 64, 0),
+	TFT_COLOR_Lime						= TFT_RGB(0, 255, 0),
+	TFT_COLOR_Green						= TFT_RGB(0, 64, 0),
+	TFT_COLOR_Aqua						= TFT_RGB(0, 255, 255),
+	TFT_COLOR_Teal						= TFT_RGB(0, 64, 64),
+	TFT_COLOR_Blue						= TFT_RGB(0, 0, 255),
+	TFT_COLOR_Navy						= TFT_RGB(0, 0, 32),
+	TFT_COLOR_clear 					= TFT_COLOR_White,
+};
+
 //Структура для координат нажатия на тачскрин 
 typedef struct xy {
 	uint16_t x;
@@ -58,8 +74,10 @@ typedef struct xy {
 void TFT_reset(void);
 //Инициализация дисплея
 void TFT_init(SPI_HandleTypeDef *_displaySPI);
+//Залитие дисплея указанным цветом
+void TFT_fill(uint16_t color);
 //Очистка дисплея (залитие белым)
-void TFT_clear(void);
+#define TFT_clear() TFT_fill(TFT_COLOR_clear)
 /* Функции работы с тачскрином */
 
 

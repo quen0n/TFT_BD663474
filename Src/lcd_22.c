@@ -283,12 +283,13 @@ SPI_HandleTypeDef *_touchSPI;
 //Размеры дисплея по горизонтали и вертикали (меняются при изменении ориентации экрана)
 uint16_t TFT_MAX_X = 320;
 uint16_t TFT_MAX_Y = 240;
+//Массив с всеми основными цветами
+const uint16_t colorfol[]={TFT_COLOR_Black,TFT_COLOR_Gray,TFT_COLOR_Silver,TFT_COLOR_White,TFT_COLOR_Fuchsia,TFT_COLOR_Purple,TFT_COLOR_Red,TFT_COLOR_Maroon,TFT_COLOR_Yellow,TFT_COLOR_Orange,TFT_COLOR_Lime,TFT_COLOR_Green,TFT_COLOR_Aqua,TFT_COLOR_Teal,TFT_COLOR_Blue,TFT_COLOR_Navy};
 //TODO: Хрензнайт что это, разобраться
 volatile xy_t touch_xy_buffer[TOUCH_MAX_CACHE];
 volatile uint8_t touch_wr_index;
 volatile uint8_t touch_rd_index;
 volatile uint8_t touch_counter;
-const uint16_t colorfol[]={0xf800,0x07e0,0x001f,0xffe0,0x0000,0xffff,0x07ff,0xf81f};
 
 //Аппаратная перезагрузка дисплея
 void TFT_reset(void) {
@@ -379,8 +380,8 @@ void TFT_init(SPI_HandleTypeDef *displaySPI) {
 	TFT_CS_Set; //Поднятие CS, т.к. общение с дисплеем закончено
 }
 //Очистка дисплея (залитие белым)
-void TFT_clear(void) {
-	TFT_CS_Reset;	
+void TFT_fill(uint16_t color) {
+	TFT_CS_Reset;	//Общение на шине именно с дисплеем
 
 	post_cmd(0x210,0x00);
 	post_cmd(0x212,0x0000);
@@ -395,8 +396,9 @@ void TFT_clear(void) {
 	TFT_data;
 	
 	for (uint32_t i = TFT_MAX_X*TFT_MAX_Y; i != 0; i--) {
-		post_data(0xFFFF);
+		post_data(color);
 	}
+	TFT_CS_Set; //Поднятие CS, т.к. общение с дисплеем закончено
 }
 
 void LCD_test(void)
@@ -417,10 +419,10 @@ void LCD_test(void)
 	TFT_index;
 	post_data(0x202);
 	TFT_data;
-	for(n=0;n<8;n++)
+	for(n=0;n<16;n++)
 	{
 	    temp=colorfol[n];
-		for(num=40*240;num>0;num--)
+		for(num=20*240;num>0;num--)
 		{
 			post_data(temp);
 		}
@@ -489,11 +491,11 @@ void DisplayChar(uint8_t casc,uint8_t postion_x,uint8_t postion_y)
 		{
 			if(b&0x80)
 			{
-				post_data(COLOR_BLACK);
+				post_data(TFT_COLOR_Black);
 			}
 			else
 			{
-				post_data(COLOR_YELLOW);
+				post_data(TFT_COLOR_Yellow);
 			}
 			b=b<<1;
 			
@@ -528,11 +530,11 @@ void DisplayChar_Reverse(uint8_t casc,uint8_t postion_x,uint8_t postion_y)
 		{
 			if(b&0x01)
 			{
-				post_data(COLOR_BLACK);
+				post_data(TFT_COLOR_Black);
 			}
 			else
 			{
-				post_data(COLOR_YELLOW);
+				post_data(TFT_COLOR_Yellow);
 			}
 			b=b>>1;
 			
@@ -688,7 +690,7 @@ uint8_t draw_lcd(void)
 	TFT_data;
 	for(n=0; n< (DOT_WIDTH*DOT_WIDTH); n++)
 	{
-		post_data(COLOR_BLACK);
+		post_data(TFT_COLOR_Black);
 	}
 	TFT_CS_Set;
 	return 1;
