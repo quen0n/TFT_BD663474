@@ -7,7 +7,7 @@
 * Version             : 1.0
 * By                  : Victor Nikitchuk & WaveShare Indian programmers
 *
-*	Основано на примере для Open16F877A. https://www.waveshare.com/wiki/File:Open16F877A-Demo.7z
+*	РћСЃРЅРѕРІР°РЅРѕ РЅР° РїСЂРёРјРµСЂРµ РґР»СЏ Open16F877A. https://www.waveshare.com/wiki/File:Open16F877A-Demo.7z
 *
 *========================================================================================================
 */
@@ -16,57 +16,57 @@
 #define LCD_22_H
 
 #include "main.h"
-/* Макросы взаимодействия с портами ввода/вывода */
-//Чтение логического уровня на пине прерывания от тачскрина
+/* РњР°РєСЂРѕСЃС‹ РІР·Р°РёРјРѕРґРµР№СЃС‚РІРёСЏ СЃ РїРѕСЂС‚Р°РјРё РІРІРѕРґР°/РІС‹РІРѕРґР° */
+//Р§С‚РµРЅРёРµ Р»РѕРіРёС‡РµСЃРєРѕРіРѕ СѓСЂРѕРІРЅСЏ РЅР° РїРёРЅРµ РїСЂРµСЂС‹РІР°РЅРёСЏ РѕС‚ С‚Р°С‡СЃРєСЂРёРЅР°
 #define PENIRQ						(HAL_GPIO_ReadPin(T_IRQ_GPIO_Port, T_IRQ_Pin) == GPIO_PIN_SET)
-//Опускание/поднятие логического уровня CS тачскрина
+//РћРїСѓСЃРєР°РЅРёРµ/РїРѕРґРЅСЏС‚РёРµ Р»РѕРіРёС‡РµСЃРєРѕРіРѕ СѓСЂРѕРІРЅСЏ CS С‚Р°С‡СЃРєСЂРёРЅР°
 #define Touch_CS_Reset		HAL_GPIO_WritePin(T_CS_GPIO_Port, T_CS_Pin, GPIO_PIN_RESET)
 #define Touch_CS_Set			HAL_GPIO_WritePin(T_CS_GPIO_Port, T_CS_Pin, GPIO_PIN_SET)
-//Опускание/поднятие логического уровня ножки сброса дисплея
+//РћРїСѓСЃРєР°РЅРёРµ/РїРѕРґРЅСЏС‚РёРµ Р»РѕРіРёС‡РµСЃРєРѕРіРѕ СѓСЂРѕРІРЅСЏ РЅРѕР¶РєРё СЃР±СЂРѕСЃР° РґРёСЃРїР»РµСЏ
 #define TFT_RESET_Reset		HAL_GPIO_WritePin(RESET_GPIO_Port, RESET_Pin, GPIO_PIN_RESET)  
 #define TFT_RESET_Set			HAL_GPIO_WritePin(RESET_GPIO_Port, RESET_Pin, GPIO_PIN_SET)
-//Опускание/поднятие логического уровня CS дисплея
+//РћРїСѓСЃРєР°РЅРёРµ/РїРѕРґРЅСЏС‚РёРµ Р»РѕРіРёС‡РµСЃРєРѕРіРѕ СѓСЂРѕРІРЅСЏ CS РґРёСЃРїР»РµСЏ
 #define TFT_CS_Reset			HAL_GPIO_WritePin(D_CS_GPIO_Port, D_CS_Pin, GPIO_PIN_RESET)
 #define TFT_CS_Set				HAL_GPIO_WritePin(D_CS_GPIO_Port, D_CS_Pin, GPIO_PIN_SET)
-//Передача данных/команды в дисплей
+//РџРµСЂРµРґР°С‡Р° РґР°РЅРЅС‹С…/РєРѕРјР°РЅРґС‹ РІ РґРёСЃРїР»РµР№
 #define TFT_data					HAL_GPIO_WritePin(D_RS_GPIO_Port, D_RS_Pin, GPIO_PIN_SET)
 #define TFT_index					HAL_GPIO_WritePin(D_RS_GPIO_Port, D_RS_Pin, GPIO_PIN_RESET)
 
-//TODO: Разобраться что за макросы
+//TODO: Р Р°Р·РѕР±СЂР°С‚СЊСЃСЏ С‡С‚Рѕ Р·Р° РјР°РєСЂРѕСЃС‹
 #define SAMP_COUNT				5
 #define SAMP_THRESHOLD		5
 
 #define TOUCH_CMD_X 		0xD0
 #define TOUCH_CMD_Y 		0x90
-/* Цвета */
-//TODO: Больше цветов
+/* Р¦РІРµС‚Р° */
+//TODO: Р‘РѕР»СЊС€Рµ С†РІРµС‚РѕРІ
 #define COLOR_YELLOW 		0xFFE0
 #define COLOR_BLACK 		0x0000
 #define COLOR_WHITE 		0xFFFF
 #define COLOR_INIT 			COLOR_YELLOW
 
 #define DOT_WIDTH 4
-//Структура для координат нажатия на тачскрин 
+//РЎС‚СЂСѓРєС‚СѓСЂР° РґР»СЏ РєРѕРѕСЂРґРёРЅР°С‚ РЅР°Р¶Р°С‚РёСЏ РЅР° С‚Р°С‡СЃРєСЂРёРЅ 
 typedef struct xy {
 	uint16_t x;
 	uint16_t y;
 } xy_t;
 
 #define TOUCH_MAX_CACHE 8
-/* Функции работы с дисплеем */
-//Аппаратная перезагрузка дисплея
+/* Р¤СѓРЅРєС†РёРё СЂР°Р±РѕС‚С‹ СЃ РґРёСЃРїР»РµРµРј */
+//РђРїРїР°СЂР°С‚РЅР°СЏ РїРµСЂРµР·Р°РіСЂСѓР·РєР° РґРёСЃРїР»РµСЏ
 void TFT_reset(void);
-//Инициализация дисплея
+//РРЅРёС†РёР°Р»РёР·Р°С†РёСЏ РґРёСЃРїР»РµСЏ
 void TFT_init(SPI_HandleTypeDef *_displaySPI);
-//Очистка дисплея (залитие белым)
+//РћС‡РёСЃС‚РєР° РґРёСЃРїР»РµСЏ (Р·Р°Р»РёС‚РёРµ Р±РµР»С‹Рј)
 void TFT_clear(void);
-/* Функции работы с тачскрином */
+/* Р¤СѓРЅРєС†РёРё СЂР°Р±РѕС‚С‹ СЃ С‚Р°С‡СЃРєСЂРёРЅРѕРј */
 
 
 
 
 
-//Прочее говно
+//РџСЂРѕС‡РµРµ РіРѕРІРЅРѕ
 void post_data(uint16_t data);
 void post_cmd(uint16_t index, uint16_t cmd);
 /**/
