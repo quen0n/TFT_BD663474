@@ -282,10 +282,9 @@ unsigned char ascii[]= {
 SPI_HandleTypeDef *_displaySPI;
 SPI_HandleTypeDef *_touchSPI;
 #endif
-
 //Размеры дисплея по горизонтали и вертикали (меняются при изменении ориентации экрана)
-uint16_t TFT_MAX_X = 320;
-uint16_t TFT_MAX_Y = 240;
+uint16_t TFT_Width = 320;
+uint16_t TFT_Lenght = 240;
 //Массив с всеми основными цветами
 const uint16_t colorfol[]={TFT_COLOR_Black,TFT_COLOR_Gray,TFT_COLOR_Silver,TFT_COLOR_White,TFT_COLOR_Fuchsia,TFT_COLOR_Purple,TFT_COLOR_Red,TFT_COLOR_Maroon,TFT_COLOR_Yellow,TFT_COLOR_Orange,TFT_COLOR_Lime,TFT_COLOR_Green,TFT_COLOR_Aqua,TFT_COLOR_Teal,TFT_COLOR_Blue,TFT_COLOR_Navy};
 //TODO: Хрензнайт что это, разобраться
@@ -303,11 +302,11 @@ void TFT_reset(void) {
 }
 //Инициализация дисплея
 #ifndef TFT_SOFTSPI
-void TFT_init(SPI_HandleTypeDef *displaySPI) {
+void TFT_init(uint8_t orientation, SPI_HandleTypeDef *displaySPI) {
 	_displaySPI = displaySPI;
 #endif
 #ifdef TFT_SOFTSPI
-void TFT_init(void) {
+void TFT_init(uint8_t orientation) {
 #endif
 	//Общение на шине именно с дисплеем
 	TFT_CS_Reset;
@@ -340,7 +339,7 @@ void TFT_init(void) {
 	TFT_sendCmd(0x009, 0x0000);		//Настройка сканирования (?)
 	TFT_sendCmd(0x00b, 0x0000);		//Настройка количества цветов дисплея. Переключение между 8 цветами и 262k
 	TFT_sendCmd(0x00c, 0x0000);		//Настройка интерфейса RGB 
-	TFT_sendCmd(0x00d, 0x0017);		//Настройка частоты обновления кадров. 0xXX10 - максимальная, 0xXX1F - минимальная частота
+	TFT_sendCmd(0x00d, 0x0015);		//Настройка частоты обновления кадров. 0xXX10 - максимальная, 0xXX1F - минимальная частота
 	/* LTPS control settings */   
 	TFT_sendCmd(0x012, 0x0000);
 	TFT_sendCmd(0x013, 0x0000);	
@@ -376,6 +375,8 @@ void TFT_init(void) {
 	TFT_sendCmd(0x402, 0x0000);		/* First screen drive position (1) */   	
 	TFT_sendCmd(0x403, 0x013f);		/* First screen drive position (2) */   	
 	TFT_sendCmd(0x404, 0x0000);
+	//Установка ориентации дисплея
+	TFT_setOrientation(orientation);
 	/* Установка текущего пикселя */
 	TFT_sendCmd(0x200, 0x0000);		//По горизонтали
 	TFT_sendCmd(0x201, 0x0000);		//По вертикали
@@ -387,7 +388,7 @@ void TFT_init(void) {
 
 	TFT_CS_Set; //Поднятие CS, т.к. общение с дисплеем закончено
 }
-//Очистка дисплея (залитие белым)
+//Залитие дисплея указанным цветом
 void TFT_fill(uint16_t color) {
 	TFT_CS_Reset;	//Общение на шине именно с дисплеем
 
@@ -403,17 +404,14 @@ void TFT_fill(uint16_t color) {
 	TFT_sendData(0x202);
 	TFT_data;
 	
-	for (uint32_t i = TFT_MAX_X*TFT_MAX_Y; i != 0; i--) {
+	for (uint32_t i = TFT_Width*TFT_Lenght; i != 0; i--) {
 		TFT_sendData(color);
 	}
 	TFT_CS_Set; //Поднятие CS, т.к. общение с дисплеем закончено
 }
 
-void LCD_test(void)
-{
-	uint16_t  temp,num;
-	uint8_t n;//i;
-
+//Функция тестирования цветов дисплея
+void LCD_test(void) {
 	TFT_CS_Reset;	
 
 	TFT_sendCmd(0x210,0x00);
@@ -427,44 +425,18 @@ void LCD_test(void)
 	TFT_index;
 	TFT_sendData(0x202);
 	TFT_data;
-	for(n=0;n<16;n++)
-	{
-	    temp=colorfol[n];
-		for(num=20*240;num>0;num--)
-		{
-			TFT_sendData(temp);
-		}
+	
+	for(uint8_t n = 0; n < 16; n++) {
+		for(uint16_t num = TFT_Width/16*TFT_Lenght; num > 0; num--) TFT_sendData(colorfol[n]);
 	}
-/*	for(n=0;n<1;n++)
-	{
-		TFT_sendCmd(0x210,0x00);
-		TFT_sendCmd(0x212,0x0000);
-		TFT_sendCmd(0x211,0xEF);
-		TFT_sendCmd(0x213,0x013F);
-
-		TFT_sendCmd(0x200,0x0000);
-		TFT_sendCmd(0x201,0x0000);
-		
-		TFT_index();
-		TFT_sendData(0x202);
-		TFT_data();
-	    temp=colorfol[n];
-		for(i=0;i<240;i++)
-		{
-			for(num=0;num<320;num++)
-			{
-		  		TFT_sendData(temp);
-			}
-		}
-	//	HAL_Delay(50);
-	}*/
 	TFT_CS_Set;
 }
+
 //Функция отправки 16 бит данных
 void TFT_sendData(uint16_t data) {
-	//Буффер данных для отправки
 	//Отправка данных по SPI
 	#ifndef TFT_SOFTSPI
+	//Буффер данных для отправки
 	uint8_t buff[2] = {data>>8, (uint8_t)data};
 	HAL_SPI_Transmit(_displaySPI, (uint8_t *)buff, 2, 0xFF);
 	#endif
@@ -491,27 +463,69 @@ void TFT_sendCmd(uint16_t cmd, uint16_t data) {
 	TFT_sendData(data);
 }
 
-void DisplayChar(uint8_t casc,uint8_t postion_x,uint8_t postion_y)
-{
+//Установка текущей ориентации
+void TFT_setOrientation(uint8_t orientation) {
+	switch(orientation) {
+		//Альбомная ориентация (левый верхний угол со стороны вывода №1)
+		case 0:
+			TFT_sendCmd(0x003, 0x1238);
+			TFT_sendCmd(0x001, 0x0000);
+			TFT_Width = 240;
+			TFT_Lenght = 320;
+			break;
+		//Альбомная ориентация (левый верхний угол со стороны шлейфа тачскрина)
+		case 1:
+			TFT_sendCmd(0x003, 0x1288);
+			TFT_sendCmd(0x001, 0x0000);
+			TFT_Width = 240;
+			TFT_Lenght = 320;
+			break;
+		//Портретная ориентация (верх со стороны 1-го пина)
+		case 2:
+			TFT_sendCmd(0x003, 0x1230);
+			TFT_sendCmd(0x001, 0x0100);
+			TFT_Width = 320;
+			TFT_Lenght = 240;
+			break;
+		//Портретная ориентация (верх со стороны 40-го пина)
+		case 3:
+			TFT_sendCmd(0x003, 0x1290);
+			TFT_sendCmd(0x001, 0x0000);
+			TFT_Width = 320;
+			TFT_Lenght = 240;
+			break;
+	}
+}
+void TFT_printChar(uint8_t casc, uint8_t postion_x, uint8_t postion_y) {
 	uint8_t i,j,b;
 	uint8_t *p;
 	
 	TFT_CS_Reset;
-	TFT_sendCmd(0x210,postion_x*8); 	//x start point
-	TFT_sendCmd(0x212,postion_y*16); 	//y start point
-	TFT_sendCmd(0x211,postion_x*8+7);	//x end point
-	TFT_sendCmd(0x213,postion_y*16+15);	//y end point
-	TFT_sendCmd(0x200,postion_x*8);	
-	TFT_sendCmd(0x201,postion_y*16);
+	//Портретная ориентация
+//	TFT_sendCmd(0x210,postion_x*8); 	//x start point
+//	TFT_sendCmd(0x212,postion_y*16); 	//y start point
+//	TFT_sendCmd(0x211,postion_x*8+7);	//x end point
+//	TFT_sendCmd(0x213,postion_y*16+15);	//y end point
+//	TFT_sendCmd(0x200,postion_x*8);	
+//	TFT_sendCmd(0x201,postion_y*16);
+	//Горизонтальная ориентация
+	TFT_sendCmd(0x210,postion_x*16); 	//x start point
+	TFT_sendCmd(0x212,postion_y*8); 	//y start point
+	TFT_sendCmd(0x211,postion_x*16+15);	//x end point
+	TFT_sendCmd(0x213,postion_y*8+7);	//y end point
+	TFT_sendCmd(0x200,postion_x*16);	
+	TFT_sendCmd(0x201,postion_y*8);
 	
 	TFT_index;
 	TFT_sendData(0x202);
 	TFT_data;
 	p=ascii;
 	p+=casc*16;
+	//8
 	for(j=0;j<16;j++)
 	{
 		b=*(p+j);
+		//16
 		for(i=0;i<8;i++)
 		{
 			if(b&0x80)
@@ -529,12 +543,21 @@ void DisplayChar(uint8_t casc,uint8_t postion_x,uint8_t postion_y)
 	TFT_CS_Set;
 }
 
-void DisplayChar_Reverse(uint8_t casc,uint8_t postion_x,uint8_t postion_y)
+void TFT_printChar_Reverse(uint8_t casc,uint8_t postion_x,uint8_t postion_y)
 {
 	uint8_t i,j,b;
 	uint8_t *p;
 	
 	TFT_CS_Reset;
+	//Портретная ориентация
+//	TFT_sendCmd(0x210,postion_x*8); 	//x start point
+//	TFT_sendCmd(0x212,postion_y*16); 	//y start point
+//	TFT_sendCmd(0x211,postion_x*8+7);	//x end point
+//	TFT_sendCmd(0x213,postion_y*16+15);	//y end point
+
+//	TFT_sendCmd(0x200,postion_x*8);	
+//	TFT_sendCmd(0x201,postion_y*16);
+	//Горизонтальная ориентация
 	TFT_sendCmd(0x210,postion_x*8); 	//x start point
 	TFT_sendCmd(0x212,postion_y*16); 	//y start point
 	TFT_sendCmd(0x211,postion_x*8+7);	//x end point
@@ -548,10 +571,12 @@ void DisplayChar_Reverse(uint8_t casc,uint8_t postion_x,uint8_t postion_y)
 	TFT_data;
 	p=ascii;
 	p+=casc*16;
-	for(j=16;j>0;j--)
+	//16
+	for(j=8;j>0;j--)
 	{
 		b=*(p+j-1);
-		for(i=0;i<8;i++)
+		//8
+		for(i=0;i<16;i++)
 		{
 			if(b&0x01)
 			{
@@ -582,31 +607,27 @@ uint8_t* swap(uint8_t *s,uint8_t sz)
     return s;
 }
 
-void DisplayString(uint8_t *s,uint8_t x,uint8_t y,uint8_t Reverse)
-{
+void DisplayString(uint8_t *s,uint8_t x,uint8_t y,uint8_t Reverse) {
 	uint8_t a[10],i;
-	if(Reverse)
-	{
+	if(Reverse)	{
 		i=0;
 		while(*s){a[i]=*s;s++;i++;}
 		s=swap(a,sizeof(a));
 	}
-	while (*s) 
-	{ 
-		if(Reverse)
-			{DisplayChar_Reverse(*s,x,y);}
-		else
-			{DisplayChar(*s,x,y);}
-		if(++x>=30)
-		{
-			x=0;
-			if(++y>=20)
-			{
-			  y=0;
-			}
+	while (*s) { 
+		if(Reverse){
+			TFT_printChar_Reverse(*s,x,y);
+		} else {
+			TFT_printChar(*s,x,y);
+		}
+		//x
+		if(++y >= 30) {
+			y=0;
+			//y
+			if(++x >= 20) x = 0;
 		}
 		s++;
-    }
+	}
 }
 
 uint16_t get_touch_data(uint16_t cmd)

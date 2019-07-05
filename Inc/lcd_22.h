@@ -80,6 +80,15 @@ typedef struct xy {
 	uint16_t y;
 } xy_t;
 
+//Ориентации дисплея
+enum ORIENTATION {
+	TFT_ORIENT_LANDSCAPE, 		//Альбомная ориентация (левый верхний угол со стороны вывода №1)
+	TFT_ORIENT_LANDSCAPE_180,	//Альбомная ориентация (левый верхний угол со стороны шлейфа тачскрина)
+	TFT_ORIENT_PORTRAIT,			//Портретная ориентация (верх со стороны 1-го пина)
+	TFT_ORIENT_PORTRAIT_180,	//Портретная ориентация (верх со стороны 40-го пина)
+};
+
+
 /* Функции работы с дисплеем */
 //Аппаратная перезагрузка дисплея
 void TFT_reset(void);
@@ -89,19 +98,38 @@ void TFT_sendData(uint16_t data);
 void TFT_sendCmd(uint16_t cmd, uint16_t data) ;
 //Инициализация дисплея
 #ifndef TFT_SOFTSPI
-void TFT_init(SPI_HandleTypeDef *displaySPI);
+void TFT_init(uint8_t orientation, SPI_HandleTypeDef *displaySPI);
 #endif
 #ifdef TFT_SOFTSPI
-void TFT_init(void);
+void TFT_init(uint8_t orientation);
 #endif
 //Залитие дисплея указанным цветом
 void TFT_fill(uint16_t color);
 //Очистка дисплея (залитие белым)
 #define TFT_clear() TFT_fill(TFT_COLOR_clear)
+//Установка текущей ориентации
+void TFT_setOrientation(uint8_t orientation);
+//Печать символа на дисплее
+void TFT_printChar(uint8_t casc, uint8_t postion_x, uint8_t postion_y);
 /* Функции работы с тачскрином */
 
 
-
+/*TODO: Функции, которые нужно реализовать
++ init(orientation) - в инициализации указывать ориентацию дисплея
++ setOrientation - повернуть дисплей
+drawPixel - закрасить отдельный пиксель
+drawLine - нарисовать линию
+fillScr - залить экран цветом (перереализовать через заливку прямоугольника)
+drawRect/circle/RoundRect/Triangle - нарисовать прямоугольник/круг/скруглённый прямоугольник/треугольник
+fillRect/circle/RoundRect/Triangle - нарисовать залитый прямоугольник/круг/скруглённый прямоугольник/треугольник
+setColor - установить цвет кисти
+setXY - установить координаты курсора
+setFont - установить текущий шрифт
+printChar - напечатать символ
+print - напечатать слово
+drawBitmap - нарисовать картинку
+on/off - включить/выключить дисплей
+*/
 
 
 //Прочее говно
