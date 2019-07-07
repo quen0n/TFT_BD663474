@@ -111,9 +111,9 @@ void TFT_fill(uint16_t color);
 void TFT_setOrientation(uint8_t orientation);
 //Печать символа на дисплее
 void TFT_printChar(uint8_t casc, uint8_t postion_x, uint8_t postion_y);
-//Выключить дисплей (отправить в глубокий сон)
+//Выключить дисплей
 void TFT_Off(void);
-//Включить дисплей (вывести из глубокого сна)
+//Включить дисплей
 void TFT_On(void);
 //Ограничение рабочей области по оси X
 void TFT_setColumn(uint16_t startX, uint16_t endX);
@@ -142,8 +142,8 @@ void TFT_drawTriangle(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint16
 + drawPixel - закрасить отдельный пиксель
 + drawLine - нарисовать линию
 + drawRect/circle/Triangle - нарисовать прямоугольник/круг/треугольник
++ on/off - включить/выключить дисплей
 RoundRect - нарисовать скруглённый прямоугольник
-on/off - включить/выключить дисплей
 fillScr - залить экран цветом (перереализовать через заливку прямоугольника)
 fillRect/circle/RoundRect/Triangle - нарисовать залитый прямоугольник/круг/скруглённый прямоугольник/треугольник
 setColor - установить цвет кисти
@@ -152,6 +152,7 @@ setFont - установить текущий шрифт
 printChar - напечатать символ
 print - напечатать слово
 drawBitmap - нарисовать картинку
+backlightOn/off - включить/выключить подсветку (опционально)
 */
 
 

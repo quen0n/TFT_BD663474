@@ -285,6 +285,8 @@ SPI_HandleTypeDef *_touchSPI;
 //Размеры дисплея по горизонтали и вертикали (меняются при изменении ориентации экрана)
 uint16_t TFT_Width = 320;
 uint16_t TFT_Lenght = 240;
+//Текущая ориентация
+uint8_t TFT_currentOrientation;
 //Массив с всеми основными цветами
 const uint16_t colorfol[]={TFT_COLOR_Black,TFT_COLOR_Gray,TFT_COLOR_Silver,TFT_COLOR_White,TFT_COLOR_Fuchsia,TFT_COLOR_Purple,TFT_COLOR_Red,TFT_COLOR_Maroon,TFT_COLOR_Yellow,TFT_COLOR_Orange,TFT_COLOR_Lime,TFT_COLOR_Green,TFT_COLOR_Aqua,TFT_COLOR_Teal,TFT_COLOR_Blue,TFT_COLOR_Navy};
 //TODO: Хрензнайт что это, разобраться
@@ -465,6 +467,7 @@ void TFT_sendCmd(uint16_t cmd, uint16_t data) {
 
 //Установка текущей ориентации
 void TFT_setOrientation(uint8_t orientation) {
+	TFT_currentOrientation = orientation;
 	switch(orientation) {
 		//Альбомная ориентация (левый верхний угол со стороны вывода №1)
 		case 0:
@@ -497,9 +500,9 @@ void TFT_setOrientation(uint8_t orientation) {
 	}
 }
 
-//Выключить дисплей (отправить в глубокий сон)
+//Выключить дисплей
 void TFT_Off(void) {
-	//Display OFF
+	/*//Display OFF
 	TFT_sendCmd(0x007, 0x0112); //D[1:0] = 0b10
 	HAL_Delay(1);
 	TFT_sendCmd(0x007, 0x0102);	//DTE = 0
@@ -509,10 +512,13 @@ void TFT_Off(void) {
 	HAL_Delay(1);
 	TFT_sendCmd(0x100, 0x0000); //PON = 0
 	//Deep standby set
-	TFT_sendCmd(0x100, 0x0004);
+	TFT_sendCmd(0x100, 0x0004);*/
+	TFT_RESET_Reset; //Просто сброс дисплея
 }
-//Включить дисплей (вывести из глубокого сна)
-void TFT_On(void);
+//Включить дисплей
+void TFT_On(void) {
+	TFT_init(TFT_currentOrientation, _displaySPI);
+}
 
 
 //Ограничение рабочей области по оси X
