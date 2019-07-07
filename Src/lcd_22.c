@@ -13,7 +13,7 @@
 */
 
 #include "LCD_22.h"
-#include <math.h>
+#include <stdlib.h>
 //Шрифт
 unsigned char ascii[]= {
 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,	//0
@@ -339,7 +339,7 @@ void TFT_init(uint8_t orientation) {
 	TFT_sendCmd(0x009, 0x0000);		//Настройка сканирования (?)
 	TFT_sendCmd(0x00b, 0x0000);		//Настройка количества цветов дисплея. Переключение между 8 цветами и 262k
 	TFT_sendCmd(0x00c, 0x0000);		//Настройка интерфейса RGB 
-	TFT_sendCmd(0x00d, 0x0015);		//Настройка частоты обновления кадров. 0xXX10 - максимальная, 0xXX1F - минимальная частота
+	TFT_sendCmd(0x00d, 0x0010);		//Настройка частоты обновления кадров. 0xXX10 - максимальная, 0xXX1F - минимальная частота
 	/* LTPS control settings */   
 	TFT_sendCmd(0x012, 0x0000);
 	TFT_sendCmd(0x013, 0x0000);	
@@ -539,12 +539,11 @@ void TFT_drawPixel(uint16_t x, uint16_t y, uint16_t color) {
 	TFT_CS_Set;						//Окончание общения с дисплеем
 }
 //Нарисовать линию начиная с x0,y0, заканчивая x1,y1 указанным цветом
-void TFT_drawLine(int x0, int y0, int x1, int y1, uint16_t color) {
-	int x = x1-x0;
-	int y = y1-y0;
-	int dx = abs(x), sx = x0<x1 ? 1 : -1;
-	int dy = -abs(y), sy = y0<y1 ? 1 : -1;
-	int err = dx+dy, e2;
+void TFT_drawLine(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint16_t color) {
+	int16_t dx = abs(x1-x0);
+	int16_t sx = x0 < x1 ? 1 : -1;
+	int16_t dy = -abs(y1-y0), sy = y0 < y1 ? 1 : -1;
+	int16_t err = dx+dy, e2;
 	for (;;){
 		TFT_drawPixel(x0,y0,color);
 		e2 = 2*err;
@@ -558,6 +557,66 @@ void TFT_drawLine(int x0, int y0, int x1, int y1, uint16_t color) {
 		}
 	}
 }
+//Нарисовать горизонтальную линию начиная с точки (x:y) длиной len указанным цветом
+void TFT_drawLineHorizontal(uint16_t x, uint16_t y, uint16_t len, uint16_t color) {
+	TFT_CS_Reset;							//Обращение к дисплею
+	TFT_setColumn(x,x+len);		//Ограничение области по X
+	TFT_setPage(y,y);					//Ограничение по Y
+	TFT_index;								//Отправка команды
+	TFT_sendData(0x202);			//Команда, значащая что дальше начнётся запись в буфер кадра
+	TFT_data;									//Отправка данных
+	for(uint16_t i = 0; i < len; i++) TFT_sendData(color); //Рисование линии указанным цветом
+	TFT_CS_Set;								//Окончание общения с дисплеем
+}
+//Нарисовать вертикальную линию начиная с точки (x:y) длиной len указанным цветом
+void TFT_drawLineVertical(uint16_t x, uint16_t y, uint16_t len, uint16_t color) {
+	TFT_CS_Reset;							//Обращение к дисплею
+	TFT_setColumn(x,x);				//Ограничение области по X
+	TFT_setPage(y,y+len);			//Ограничение по Y
+	TFT_index;								//Отправка команды
+	TFT_sendData(0x202);			//Команда, значащая что дальше начнётся запись в буфер кадра
+	TFT_data;									//Отправка данных
+	for(uint16_t i = 0; i < len; i++) TFT_sendData(color); //Рисование линии указанным цветом
+	TFT_CS_Set;								//Окончание общения с дисплеем
+}
+//Нарисовать окружность с центром в координате (x,y), радиусом radius и указанным цветом
+void TFT_drawCircle(uint16_t x, uint16_t y, uint16_t radius, uint16_t color) {
+	 int16_t x_ = 0;
+   int16_t y_ = radius;
+   int16_t delta = 1 - 2 * radius;
+   int16_t error = 0;
+   while (y_ >= 0) {
+       TFT_drawPixel(x + x_, y + y_, color);
+       TFT_drawPixel(x + x_, y - y_, color);
+       TFT_drawPixel(x - x_, y + y_, color);
+       TFT_drawPixel(x - x_, y - y_, color);
+       error = 2 * (delta + y_) - 1;
+       if ((delta < 0) && (error <= 0)) {
+           delta += 2 * ++x_ + 1;
+           continue;
+			 }
+       if ((delta > 0) && (error > 0)) {
+           delta -= 2 * --y_ + 1;
+           continue;
+			 }
+       delta += 2 * (++x_ - y_--);
+		 }
+}
+//Нарисовать прямоугольник начиная с точки (x:y), с указанной длиной, шириной и цветом
+void TFT_drawRectangle(uint16_t x, uint16_t y, uint16_t length, uint16_t width, uint16_t color) {
+	TFT_drawLineHorizontal(x, y, length, color);
+	TFT_drawLineHorizontal(x, y+width, length, color);
+	TFT_drawLineVertical(x,y, width, color);
+	TFT_drawLineVertical(x+length,y, width, color);
+}
+//Нарисовать треугольник по координатам вершин и указанным цветом
+void TFT_drawTriangle(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t color) {
+	TFT_drawLine(x0, y0, x1, y1, color);
+	TFT_drawLine(x1, y1, x2, y2, color);
+	TFT_drawLine(x2, y2, x0, y0, color);
+}
+
+
 void TFT_printChar(uint8_t casc, uint8_t postion_x, uint8_t postion_y) {
 	uint8_t i,j,b;
 	uint8_t *p;
@@ -691,11 +750,11 @@ void DisplayString(uint8_t *s,uint8_t x,uint8_t y,uint8_t Reverse) {
 		s++;
 	}
 }
-
+/*
 uint16_t get_touch_data(uint16_t cmd)
 {
 	uint8_t buff[2];
-	/*uint8_t tmp;
+	uint8_t tmp;
 	SSPBUF = cmd;
 	while(!SSPIF);
 	SSPIF=0;
@@ -708,7 +767,7 @@ uint16_t get_touch_data(uint16_t cmd)
 
 	SSPBUF = 0;
 	while(!SSPIF);
-	SSPIF=0;*/
+	SSPIF=0;
 	//HAL_SPI_Receive(_touchSPI, (uint8_t *)buff, 2, 0xFF);
 
 	return ( ((uint16_t)buff[0])<<5 | ((uint16_t)buff[1])>>3);
@@ -803,4 +862,4 @@ uint8_t draw_lcd(void)
 	TFT_CS_Set;
 	return 1;
 }
-/**/
+*/

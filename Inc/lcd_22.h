@@ -122,18 +122,29 @@ void TFT_setPage(uint16_t startY, uint16_t endY);
 //Закрасить пиксель по координатам X,Y указанным цветом
 void TFT_drawPixel(uint16_t x, uint16_t y, uint16_t color);
 //Нарисовать линию начиная с x0,y0, заканчивая x1,y1 указанным цветом
-void TFT_drawLine(int x0, int y0, int x1, int y1, uint16_t color);
+void TFT_drawLine(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint16_t color);
+//Нарисовать горизонтальную линию начиная с точки (x:y) длиной len указанным цветом
+void TFT_drawLineHorizontal(uint16_t x, uint16_t y, uint16_t len, uint16_t color);
+//Нарисовать вертикальную линию начиная с точки (x:y) длиной len указанным цветом
+void TFT_drawLineVertical(uint16_t x, uint16_t y, uint16_t len, uint16_t color);
+//Нарисовать окружность с центром в координате (x,y), радиусом radius и указанным цветом
+void TFT_drawCircle(uint16_t x, uint16_t y, uint16_t radius, uint16_t color);
+//Нарисовать прямоугольник начиная с точки (x:y), с указанной длиной, шириной и цветом
+void TFT_drawRectangle(uint16_t x, uint16_t y, uint16_t length, uint16_t width, uint16_t color);
+//Нарисовать треугольник по координатам вершин и указанным цветом
+void TFT_drawTriangle(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t color);
 /* Функции работы с тачскрином */
 
 
 /*TODO: Функции, которые нужно реализовать
 + init(orientation) - в инициализации указывать ориентацию дисплея
 + setOrientation - повернуть дисплей
++ drawPixel - закрасить отдельный пиксель
++ drawLine - нарисовать линию
++ drawRect/circle/Triangle - нарисовать прямоугольник/круг/треугольник
+RoundRect - нарисовать скруглённый прямоугольник
 on/off - включить/выключить дисплей
-drawPixel - закрасить отдельный пиксель
-drawLine - нарисовать линию
 fillScr - залить экран цветом (перереализовать через заливку прямоугольника)
-drawRect/circle/RoundRect/Triangle - нарисовать прямоугольник/круг/скруглённый прямоугольник/треугольник
 fillRect/circle/RoundRect/Triangle - нарисовать залитый прямоугольник/круг/скруглённый прямоугольник/треугольник
 setColor - установить цвет кисти
 setXY - установить координаты курсора
@@ -145,15 +156,13 @@ drawBitmap - нарисовать картинку
 
 
 //Прочее говно
-void post_data(uint16_t data);
-void post_cmd(uint16_t index, uint16_t cmd);
-/**/
+/*
 uint16_t get_touch_data(uint16_t cmd);
 xy_t get_touch_xy(void);
 uint8_t get_point_xy(void);
 uint8_t draw_lcd(void);
 void init_lcd(void);
-
+*/
 void LCD_test(void);
 
 #endif
