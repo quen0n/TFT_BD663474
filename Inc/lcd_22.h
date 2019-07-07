@@ -71,7 +71,7 @@ enum COLOR{
 	TFT_COLOR_Teal						= TFT_RGB(0, 64, 64),
 	TFT_COLOR_Blue						= TFT_RGB(0, 0, 255),
 	TFT_COLOR_Navy						= TFT_RGB(0, 0, 32),
-	TFT_COLOR_clear 					= TFT_COLOR_White,
+	TFT_COLOR_clear 					= TFT_COLOR_Black,
 };
 
 //Структура для координат нажатия на тачскрин 
@@ -104,9 +104,9 @@ void TFT_init(uint8_t orientation, SPI_HandleTypeDef *displaySPI);
 void TFT_init(uint8_t orientation);
 #endif
 //Залитие дисплея указанным цветом
-void TFT_fill(uint16_t color);
+void TFT_fillDisplay(uint16_t color);
 //Очистка дисплея (залитие белым)
-#define TFT_clear() TFT_fill(TFT_COLOR_clear)
+#define TFT_clear() TFT_fillDisplay(TFT_COLOR_clear)
 //Установка текущей ориентации
 void TFT_setOrientation(uint8_t orientation);
 //Печать символа на дисплее
@@ -133,6 +133,21 @@ void TFT_drawCircle(uint16_t x, uint16_t y, uint16_t radius, uint16_t color);
 void TFT_drawRectangle(uint16_t x, uint16_t y, uint16_t length, uint16_t width, uint16_t color);
 //Нарисовать треугольник по координатам вершин и указанным цветом
 void TFT_drawTriangle(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t color);
+//Залить прямоугольник начиная с точки (x:y), с указанной длиной, шириной и цветом
+void TFT_fillRectangle(uint16_t x, uint16_t y, uint16_t lenght, uint16_t width, uint16_t color);
+//Залить окружность с центром в координате (x,y), радиусом radius и указанным цветом
+void TFT_fillCircle(uint16_t x, uint16_t y, uint16_t radius, uint16_t color);
+//Функция для рисования четверти круга с центром (x:y), с указанным радиусом, фазой и цветом
+void TFT_drawQuadrant(int16_t x, int16_t y, int16_t radius, uint8_t size, uint8_t c, uint16_t color);
+//Нарисовать прямоугольник с скруглёнными углами начиная с точки (x:y), с указанной длиной, шириной, радиусом скругления и цветом
+void TFT_drawRoundRect(uint16_t x, uint16_t y, uint16_t width, uint16_t length, uint16_t radius, uint16_t size, uint16_t color);
+//Функция для закрашивания четверти круга с центром (x:y), с указанным радиусом, фазой и цветом
+void TFT_fillQuadrant(int16_t x, int16_t y, int16_t radius, uint8_t c, int16_t delta, uint16_t color);
+//Закрасить прямоугольник с скруглёнными углами начиная с точки (x:y), с указанной длиной, шириной, радиусом скругления и цветом
+void TFT_fillRoundRect(uint16_t x, uint16_t y, uint16_t width, uint16_t length, uint16_t radius, uint16_t size, uint16_t color);
+
+
+
 /* Функции работы с тачскрином */
 
 
@@ -141,11 +156,9 @@ void TFT_drawTriangle(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint16
 + setOrientation - повернуть дисплей
 + drawPixel - закрасить отдельный пиксель
 + drawLine - нарисовать линию
-+ drawRect/circle/Triangle - нарисовать прямоугольник/круг/треугольник
++ drawRect/circle/Triangle,RoundRect - нарисовать прямоугольник/круг/треугольник/скруглённый прямоугольник
 + on/off - включить/выключить дисплей
-RoundRect - нарисовать скруглённый прямоугольник
-fillScr - залить экран цветом (перереализовать через заливку прямоугольника)
-fillRect/circle/RoundRect/Triangle - нарисовать залитый прямоугольник/круг/скруглённый прямоугольник/треугольник
++ fillRect/circle/RoundRect/Triangle - нарисовать залитый прямоугольник/круг/скруглённый прямоугольник/треугольник
 setColor - установить цвет кисти
 setXY - установить координаты курсора
 setFont - установить текущий шрифт
@@ -153,6 +166,8 @@ printChar - напечатать символ
 print - напечатать слово
 drawBitmap - нарисовать картинку
 backlightOn/off - включить/выключить подсветку (опционально)
+
+Исправить косяки с ориентацией
 */
 
 
