@@ -111,12 +111,25 @@ void TFT_fill(uint16_t color);
 void TFT_setOrientation(uint8_t orientation);
 //Печать символа на дисплее
 void TFT_printChar(uint8_t casc, uint8_t postion_x, uint8_t postion_y);
+//Выключить дисплей (отправить в глубокий сон)
+void TFT_Off(void);
+//Включить дисплей (вывести из глубокого сна)
+void TFT_On(void);
+//Ограничение рабочей области по оси X
+void TFT_setColumn(uint16_t startX, uint16_t endX);
+//Ограничение рабочей области по оси Y
+void TFT_setPage(uint16_t startY, uint16_t endY);
+//Закрасить пиксель по координатам X,Y указанным цветом
+void TFT_drawPixel(uint16_t x, uint16_t y, uint16_t color);
+//Нарисовать линию начиная с x0,y0, заканчивая x1,y1 указанным цветом
+void TFT_drawLine(int x0, int y0, int x1, int y1, uint16_t color);
 /* Функции работы с тачскрином */
 
 
 /*TODO: Функции, которые нужно реализовать
 + init(orientation) - в инициализации указывать ориентацию дисплея
 + setOrientation - повернуть дисплей
+on/off - включить/выключить дисплей
 drawPixel - закрасить отдельный пиксель
 drawLine - нарисовать линию
 fillScr - залить экран цветом (перереализовать через заливку прямоугольника)
@@ -128,7 +141,6 @@ setFont - установить текущий шрифт
 printChar - напечатать символ
 print - напечатать слово
 drawBitmap - нарисовать картинку
-on/off - включить/выключить дисплей
 */
 
 

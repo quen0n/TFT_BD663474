@@ -13,7 +13,7 @@
 */
 
 #include "LCD_22.h"
-
+#include <math.h>
 //Шрифт
 unsigned char ascii[]= {
 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,	//0
@@ -494,6 +494,68 @@ void TFT_setOrientation(uint8_t orientation) {
 			TFT_Width = 320;
 			TFT_Lenght = 240;
 			break;
+	}
+}
+
+//Выключить дисплей (отправить в глубокий сон)
+void TFT_Off(void) {
+	//Display OFF
+	TFT_sendCmd(0x007, 0x0112); //D[1:0] = 0b10
+	HAL_Delay(1);
+	TFT_sendCmd(0x007, 0x0102);	//DTE = 0
+	TFT_sendCmd(0x100, 0x3120); //GON = 0
+	//LCD power supply OFF
+	TFT_sendCmd(0x100, 0x0000); //SAP = 0, AP[1:0] = 0b00, PON = 1, COM = 0, GON = 0
+	HAL_Delay(1);
+	TFT_sendCmd(0x100, 0x0000); //PON = 0
+	//Deep standby set
+	TFT_sendCmd(0x100, 0x0004);
+}
+//Включить дисплей (вывести из глубокого сна)
+void TFT_On(void);
+
+
+//Ограничение рабочей области по оси X
+void TFT_setColumn(uint16_t startX, uint16_t endX) {
+	TFT_sendCmd(0x210,startX);
+	TFT_sendCmd(0x211,endX);
+	TFT_sendCmd(0x200,startX);	
+}
+//Ограничение рабочей области по оси Y
+void TFT_setPage(uint16_t startY, uint16_t endY) {
+	TFT_sendCmd(0x212,startY);
+	TFT_sendCmd(0x213,endY);
+	TFT_sendCmd(0x201,startY);
+}
+//Закрасить пиксель по координатам X,Y указанным цветом
+void TFT_drawPixel(uint16_t x, uint16_t y, uint16_t color) {
+	TFT_CS_Reset;					//Обращение к дисплею
+	TFT_setColumn(x,x);		//Указание координаты пикселя по X
+	TFT_setPage(y,y);			//Указание координаты пикселя по Y
+	TFT_index;						//Отправка команды
+	TFT_sendData(0x202);	//Команда, значащая что дальше начнётся запись в буфер кадра
+	TFT_data;							//Отправка данных
+	TFT_sendData(color);	//Указание цвета закрашивания пикселя
+	TFT_CS_Set;						//Окончание общения с дисплеем
+}
+//Нарисовать линию начиная с x0,y0, заканчивая x1,y1 указанным цветом
+void TFT_drawLine(int x0, int y0, int x1, int y1, uint16_t color) {
+	int x = x1-x0;
+	int y = y1-y0;
+	int dx = abs(x), sx = x0<x1 ? 1 : -1;
+	int dy = -abs(y), sy = y0<y1 ? 1 : -1;
+	int err = dx+dy, e2;
+	for (;;){
+		TFT_drawPixel(x0,y0,color);
+		e2 = 2*err;
+		if (e2 >= dy) {
+			if (x0 == x1) break;
+			err += dy; x0 += sx;
+		}
+		if (e2 <= dx) {
+			if (y0 == y1) break;
+			err += dx; y0 += sy;
+		}
 	}
 }
 void TFT_printChar(uint8_t casc, uint8_t postion_x, uint8_t postion_y) {
