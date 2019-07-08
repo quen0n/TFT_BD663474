@@ -16,6 +16,10 @@
 #define LCD_22_H
 
 #include "main.h"
+
+//Макрос задержки в мс
+#define delay_ms(d) HAL_Delay(d)
+
 /* Макросы взаимодействия с портами ввода/вывода */
 //Чтение логического уровня на пине прерывания от тачскрина
 #define PENIRQ						(HAL_GPIO_ReadPin(T_IRQ_GPIO_Port, T_IRQ_Pin) == GPIO_PIN_SET)
@@ -32,6 +36,7 @@
 #define TFT_data					HAL_GPIO_WritePin(D_RS_GPIO_Port, D_RS_Pin, GPIO_PIN_SET)
 #define TFT_index					HAL_GPIO_WritePin(D_RS_GPIO_Port, D_RS_Pin, GPIO_PIN_RESET)
 
+
 //Если вы хотите использовать программный SPI, то раскомментируйте это
 //#define TFT_SOFTSPI
 
@@ -43,8 +48,6 @@
 #define TFT_SCK_Reset		HAL_GPIO_WritePin(SPI_SCK_GPIO_Port, SPI_SCK_Pin, GPIO_PIN_RESET)
 #endif
 
-//Преобразование RGB в 16-ти битный формат 565
-#define	TFT_RGB(R, G, B)	(((B >> 3)) | ((G >> 2) << 5) | ((R >> 3) << 11))
 //TODO: Разобраться что за макросы
 #define SAMP_COUNT				5
 #define SAMP_THRESHOLD		5
@@ -53,6 +56,8 @@
 #define TOUCH_CMD_Y 		0x90
 #define TOUCH_MAX_CACHE 8
 
+//Преобразование RGB в 16-ти битный формат 565
+#define	TFT_RGB(R, G, B)	(((B >> 3)) | ((G >> 2) << 5) | ((R >> 3) << 11))
 //Цвета
 enum COLOR{
 	TFT_COLOR_Black 					= TFT_RGB(0, 0, 0),
@@ -73,6 +78,8 @@ enum COLOR{
 	TFT_COLOR_Navy						= TFT_RGB(0, 0, 32),
 	TFT_COLOR_clear 					= TFT_COLOR_Black,
 };
+//Текущий цвет, который установлен функцией TFT_setColor()
+#define TFT_COLOR_CURRENT TFT_getColor()
 
 //Структура для координат нажатия на тачскрин 
 typedef struct xy {
@@ -119,6 +126,11 @@ void TFT_On(void);
 void TFT_setColumn(uint16_t startX, uint16_t endX);
 //Ограничение рабочей области по оси Y
 void TFT_setPage(uint16_t startY, uint16_t endY);
+//Установить текущий цвет кисти
+void TFT_setColor(uint16_t color);
+//Получить текущий цвет кисти
+uint16_t TFT_getColor(void);
+
 //Закрасить пиксель по координатам X,Y указанным цветом
 void TFT_drawPixel(uint16_t x, uint16_t y, uint16_t color);
 //Нарисовать линию начиная с x0,y0, заканчивая x1,y1 указанным цветом
@@ -137,6 +149,7 @@ void TFT_drawTriangle(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint16
 void TFT_drawQuadrant(int16_t x, int16_t y, int16_t radius, uint8_t size, uint8_t c, uint16_t color);
 //Нарисовать прямоугольник с скруглёнными углами начиная с точки (x:y), с указанной длиной, шириной, радиусом скругления и цветом
 void TFT_drawRoundRect(uint16_t x, uint16_t y, uint16_t width, uint16_t length, uint16_t radius, uint16_t size, uint16_t color);
+
 //Залить прямоугольник начиная с точки (x:y), с указанной длиной, шириной и цветом
 void TFT_fillRectangle(uint16_t x, uint16_t y, uint16_t lenght, uint16_t width, uint16_t color);
 //Залить окружность с центром в координате (x,y), радиусом radius и указанным цветом
@@ -159,7 +172,7 @@ void TFT_fillRoundRect(uint16_t x, uint16_t y, uint16_t width, uint16_t length, 
 + drawRect/circle/Triangle,RoundRect - нарисовать прямоугольник/круг/треугольник/скруглённый прямоугольник
 + on/off - включить/выключить дисплей
 + fillRect/circle/RoundRect/Triangle - нарисовать залитый прямоугольник/круг/скруглённый прямоугольник/треугольник
-setColor - установить цвет кисти
++ setColor - установить цвет кисти
 setXY - установить координаты курсора
 setFont - установить текущий шрифт
 printChar - напечатать символ
@@ -170,7 +183,6 @@ backlightOn/off - включить/выключить подсветку (опц
 Исправить косяки с ориентацией
 Проверить длины линий и фигур
 Написать нормальные тесты
-Добавить макрос для задержек в милисекундах
 */
 
 

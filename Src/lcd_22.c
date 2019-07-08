@@ -287,6 +287,8 @@ uint16_t TFT_Width = 320;
 uint16_t TFT_Lenght = 240;
 //Текущая ориентация
 uint8_t TFT_currentOrientation;
+//Текущий цвет кисти
+uint16_t currentColor;
 //Массив с всеми основными цветами
 const uint16_t colorfol[]={TFT_COLOR_Black,TFT_COLOR_Gray,TFT_COLOR_Silver,TFT_COLOR_White,TFT_COLOR_Fuchsia,TFT_COLOR_Purple,TFT_COLOR_Red,TFT_COLOR_Maroon,TFT_COLOR_Yellow,TFT_COLOR_Orange,TFT_COLOR_Lime,TFT_COLOR_Green,TFT_COLOR_Aqua,TFT_COLOR_Teal,TFT_COLOR_Blue,TFT_COLOR_Navy};
 //TODO: Хрензнайт что это, разобраться
@@ -298,9 +300,9 @@ volatile uint8_t touch_counter;
 //Аппаратная перезагрузка дисплея
 void TFT_reset(void) {
 	TFT_RESET_Reset;
-	HAL_Delay(1);
+	delay_ms(1);
 	TFT_RESET_Set;
-	HAL_Delay(1);
+	delay_ms(1);
 }
 //Инициализация дисплея
 #ifndef TFT_SOFTSPI
@@ -316,7 +318,7 @@ void TFT_init(uint8_t orientation) {
 	TFT_reset();
 	
 	TFT_sendCmd(0x000,0x0001); //Запуск осциллятора
-	HAL_Delay(10);
+	delay_ms(10);
 	/* Настройки питания */  	
 	TFT_sendCmd(0x100, 0x0000);		//Дисплей выключен
 	TFT_sendCmd(0x101, 0x0000);		//Тактирование выключено 
@@ -325,9 +327,9 @@ void TFT_init(uint8_t orientation) {
 	TFT_sendCmd(0x110, 0x009d);		//Настройка апмлитуд переменного напряжения матрицы 
 	TFT_sendCmd(0x111, 0x0022);		//Настройка тока 
 	TFT_sendCmd(0x100, 0x0120);		//Включение операционных усилителей и запуск генератора градационного напряжения
-	HAL_Delay(20);
+	delay_ms(20);
 	TFT_sendCmd(0x100, 0x3120);		//Включение питания матрицы и всего остального
-	HAL_Delay(80);
+	delay_ms(80);
 	/* Управление дисплеем */   
 	TFT_sendCmd(0x001, 0x0100); 	//Ориентация дисплея: 0x0100 - сверху вниз, 0x0000 - снизу вверх. Можно отзеркалить изображение 	
 	TFT_sendCmd(0x002, 0x0000);		//Установка формы сигнала драйвера
@@ -385,7 +387,7 @@ void TFT_init(uint8_t orientation) {
 	
 	TFT_sendCmd(0x100, 0x7120);		//Включение питания дисплея
 	TFT_sendCmd(0x007, 0x0103);		//Разрешение изображения
-	HAL_Delay(10);
+	delay_ms(10);
 	TFT_sendCmd(0x007, 0x0113);		//Включение ключей
 
 	TFT_CS_Set; //Поднятие CS, т.к. общение с дисплеем закончено
@@ -504,12 +506,12 @@ void TFT_setOrientation(uint8_t orientation) {
 void TFT_Off(void) {
 	/*//Display OFF
 	TFT_sendCmd(0x007, 0x0112); //D[1:0] = 0b10
-	HAL_Delay(1);
+	delay_ms(1);
 	TFT_sendCmd(0x007, 0x0102);	//DTE = 0
 	TFT_sendCmd(0x100, 0x3120); //GON = 0
 	//LCD power supply OFF
 	TFT_sendCmd(0x100, 0x0000); //SAP = 0, AP[1:0] = 0b00, PON = 1, COM = 0, GON = 0
-	HAL_Delay(1);
+	delay_ms(1);
 	TFT_sendCmd(0x100, 0x0000); //PON = 0
 	//Deep standby set
 	TFT_sendCmd(0x100, 0x0004);*/
@@ -533,6 +535,15 @@ void TFT_setPage(uint16_t startY, uint16_t endY) {
 	TFT_sendCmd(0x213,endY);
 	TFT_sendCmd(0x201,startY);
 }
+//Установить текущий цвет кисти
+void TFT_setColor(uint16_t color) {
+	currentColor = color;
+}
+//Получить текущий цвет кисти
+uint16_t TFT_getColor(void) {
+	return currentColor;
+}
+
 //Закрасить пиксель по координатам X,Y указанным цветом
 void TFT_drawPixel(uint16_t x, uint16_t y, uint16_t color) {
 	TFT_CS_Reset;					//Обращение к дисплею
