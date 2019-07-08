@@ -16,6 +16,7 @@
 #define LCD_22_H
 
 #include "main.h"
+#include <stdio.h>
 
 //Макрос задержки в мс
 #define delay_ms(d) HAL_Delay(d)
@@ -129,6 +130,9 @@ uint16_t TFT_getColor(void);
 //Установить рабочую область от точки (x0,y0) до (x1, y1)
 void TFT_setWindow(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1);
 
+void LCD_test(void);
+
+
 //Закрасить пиксель по координатам X,Y указанным цветом
 void TFT_drawPixel(uint16_t x, uint16_t y, uint16_t color);
 //Нарисовать линию начиная с x0,y0, заканчивая x1,y1 указанным цветом
@@ -155,7 +159,7 @@ void TFT_fillCircle(uint16_t x, uint16_t y, uint16_t radius, uint16_t color);
 //Функция для закрашивания четверти круга с центром (x:y), с указанным радиусом, фазой и цветом
 void TFT_fillQuadrant(int16_t x, int16_t y, int16_t radius, uint8_t c, int16_t delta, uint16_t color);
 //Закрасить прямоугольник с скруглёнными углами начиная с точки (x:y), с указанной длиной, шириной, радиусом скругления и цветом
-void TFT_fillRoundRect(uint16_t x, uint16_t y, uint16_t width, uint16_t height, uint16_t radius, uint16_t size, uint16_t color);
+void TFT_fillRoundRect(uint16_t x, uint16_t y, uint16_t width, uint16_t height, uint16_t radius, uint16_t color);
 
 
 
@@ -192,6 +196,5 @@ uint8_t get_point_xy(void);
 uint8_t draw_lcd(void);
 void init_lcd(void);
 */
-void LCD_test(void);
-
+void DisplayString(uint8_t *s,uint8_t x,uint8_t y,uint8_t Reverse);
 #endif
