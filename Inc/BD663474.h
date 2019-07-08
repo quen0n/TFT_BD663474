@@ -110,7 +110,7 @@ uint16_t TFT_getColor(void);
 //Установить рабочую область от точки (x0,y0) до (x1, y1)
 void TFT_setWindow(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1);
 
-void LCD_test(void);
+void TFT_test(void);
 
 
 //Закрасить пиксель по координатам X,Y указанным цветом
@@ -155,8 +155,6 @@ setFont - установить текущий шрифт
 printChar - напечатать символ
 print - напечатать слово
 drawBitmap - нарисовать картинку
-
-Исправить косячки в тестах
 */
 
 //Прочее говно

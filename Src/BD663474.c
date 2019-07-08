@@ -743,7 +743,7 @@ void TFT_fillRoundRect(uint16_t x, uint16_t y, uint16_t width, uint16_t height, 
   TFT_fillQuadrant(x+radius, y+radius, radius, 2, height-2*radius-1, color);
 }
 //Функция тестирования работы дисплея
-void LCD_test(void) {
+void TFT_test(void) {
 	//Массив с всеми основными цветами
 	const uint16_t colorfol[]={TFT_COLOR_Black,TFT_COLOR_Gray,TFT_COLOR_Silver,TFT_COLOR_White,TFT_COLOR_Fuchsia,TFT_COLOR_Purple,TFT_COLOR_Red,TFT_COLOR_Maroon,TFT_COLOR_Yellow,TFT_COLOR_Orange,TFT_COLOR_Lime,TFT_COLOR_Green,TFT_COLOR_Aqua,TFT_COLOR_Teal,TFT_COLOR_Blue,TFT_COLOR_Navy};
 	//Нужно для печати информации о скорости выполнения теста
@@ -775,8 +775,8 @@ void LCD_test(void) {
 	/* Тест 2. Рисование лучей от точки (0,0) до противоположных сторон */
 	TFT_clear();
 	starttime = HAL_GetTick();
-	for (uint8_t i = 0; i < 16; i++) TFT_drawLine(0,0, TFT_Width-1, TFT_Height-i*16-1, 2, colorfol[i]);
-	for (uint8_t i = 0; i < 16; i++) TFT_drawLine(0,0, TFT_Width-i*24-1, TFT_Height-1, 2, colorfol[i]);
+	for (uint8_t i = 0; i < 16; i++) TFT_drawLine(0,0, TFT_Width-1, TFT_Height-i*(TFT_Height/16)-1, 2, colorfol[i]);
+	for (uint8_t i = 0; i < 16; i++) TFT_drawLine(0,0, TFT_Width-i*(TFT_Width/16)-1, TFT_Height-1, 2, colorfol[i]);
 	sprintf(buff, "%d", HAL_GetTick()-starttime);
 	DisplayString(buff,TFT_Width-1, TFT_Height-1,0);
 	HAL_Delay(1500);
@@ -804,7 +804,7 @@ void LCD_test(void) {
 	/* Тест 6. Рисование треугольников разного размера */
 	TFT_clear();
 	starttime = HAL_GetTick();
-	for (uint8_t i = 0; i < 16; i++) TFT_drawTriangle (TFT_Width/2 - TFT_Width/32*i, TFT_Height-TFT_Height/32*(15-i), TFT_Width/2 + TFT_Width/32*i, TFT_Height-TFT_Height/32*(15-i), TFT_Width/2, TFT_Height/32*(15-i), 2, colorfol[i]);  
+	for (uint8_t i = 0; i < 16; i++) TFT_drawTriangle (TFT_Width/2 - TFT_Width/32*i, TFT_Height-TFT_Height/32*(16-i), TFT_Width/2 + TFT_Width/32*i, TFT_Height-TFT_Height/32*(16-i), TFT_Width/2, TFT_Height/32*(16-i), 2, colorfol[i]);  
 	sprintf(buff, "%d", HAL_GetTick()-starttime);
 	DisplayString(buff,TFT_Width-1, TFT_Height-1,0);
 	HAL_Delay(1500);
@@ -817,9 +817,10 @@ void LCD_test(void) {
 	sprintf(buff, "%d", HAL_GetTick()-starttime);
 	DisplayString(buff,TFT_Width-1, TFT_Height-1,0);
 	HAL_Delay(1500);
-	
-
 }
+
+
+
 void TFT_printChar(uint8_t casc, uint8_t postion_x, uint8_t postion_y) {
 	uint8_t i,j,b;
 	uint8_t *p;
