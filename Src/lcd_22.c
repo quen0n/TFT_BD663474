@@ -283,8 +283,7 @@ SPI_HandleTypeDef *_displaySPI;
 SPI_HandleTypeDef *_touchSPI;
 #endif
 //Размеры дисплея по горизонтали и вертикали (меняются при изменении ориентации экрана)
-uint16_t TFT_Width = 320;
-uint16_t TFT_Lenght = 240;
+uint16_t TFT_Width, TFT_Height;
 //Текущая ориентация
 uint8_t TFT_currentOrientation;
 //Текущий цвет кисти
@@ -395,11 +394,8 @@ void TFT_init(uint8_t orientation) {
 //Залитие дисплея указанным цветом
 void TFT_fillDisplay(uint16_t color) {
 	TFT_CS_Reset;	//Общение на шине именно с дисплеем
-
-	TFT_sendCmd(0x210,0x00);
-	TFT_sendCmd(0x212,0x0000);
-	TFT_sendCmd(0x211,0xEF);
-	TFT_sendCmd(0x213,0x013F);
+	
+	TFT_setWindow(0,0, TFT_Width-1, TFT_Height-1);
 	
 	TFT_sendCmd(0x200,0x0000);
 	TFT_sendCmd(0x201,0x0000);
@@ -408,7 +404,7 @@ void TFT_fillDisplay(uint16_t color) {
 	TFT_sendData(0x202);
 	TFT_data;
 	
-	for (uint32_t i = TFT_Width*TFT_Lenght; i != 0; i--) {
+	for (uint32_t i = TFT_Width*TFT_Height; i != 0; i--) {
 		TFT_sendData(color);
 	}
 	TFT_CS_Set; //Поднятие CS, т.к. общение с дисплеем закончено
@@ -418,20 +414,14 @@ void TFT_fillDisplay(uint16_t color) {
 void LCD_test(void) {
 	TFT_CS_Reset;	
 
-	TFT_sendCmd(0x210,0x00);
-	TFT_sendCmd(0x212,0x0000);
-	TFT_sendCmd(0x211,0xEF);
-	TFT_sendCmd(0x213,0x013F);
-	
-	TFT_sendCmd(0x200,0x0000);
-	TFT_sendCmd(0x201,0x0000);
+	TFT_setWindow(0,0, TFT_Width-1, TFT_Height-1);
 
 	TFT_index;
 	TFT_sendData(0x202);
 	TFT_data;
 	
 	for(uint8_t n = 0; n < 16; n++) {
-		for(uint16_t num = TFT_Width/16*TFT_Lenght; num > 0; num--) TFT_sendData(colorfol[n]);
+		for(uint16_t num = TFT_Width/16*TFT_Height; num > 0; num--) TFT_sendData(colorfol[n]);
 	}
 	TFT_CS_Set;
 }
@@ -471,33 +461,29 @@ void TFT_sendCmd(uint16_t cmd, uint16_t data) {
 void TFT_setOrientation(uint8_t orientation) {
 	TFT_currentOrientation = orientation;
 	switch(orientation) {
-		//Альбомная ориентация (левый верхний угол со стороны вывода №1)
+		//Портретная ориентация (верх со стороны 1-го пина)
 		case 0:
-			TFT_sendCmd(0x003, 0x1238);
-			TFT_sendCmd(0x001, 0x0000);
+			TFT_sendCmd(0x003, 0x10A0);
 			TFT_Width = 240;
-			TFT_Lenght = 320;
+			TFT_Height = 320;
 			break;
 		//Альбомная ориентация (левый верхний угол со стороны шлейфа тачскрина)
 		case 1:
-			TFT_sendCmd(0x003, 0x1288);
-			TFT_sendCmd(0x001, 0x0000);
-			TFT_Width = 240;
-			TFT_Lenght = 320;
-			break;
-		//Портретная ориентация (верх со стороны 1-го пина)
-		case 2:
-			TFT_sendCmd(0x003, 0x1230);
-			TFT_sendCmd(0x001, 0x0100);
+			TFT_sendCmd(0x003, 0x1098);
 			TFT_Width = 320;
-			TFT_Lenght = 240;
+			TFT_Height = 240;
 			break;
 		//Портретная ориентация (верх со стороны 40-го пина)
+		case 2:
+			TFT_sendCmd(0x003, 0x1080);
+			TFT_Width = 240;
+			TFT_Height = 320;
+			break;
+		//Альбомная ориентация (левый верхний угол со стороны вывода №1)
 		case 3:
-			TFT_sendCmd(0x003, 0x1290);
-			TFT_sendCmd(0x001, 0x0000);
+			TFT_sendCmd(0x003, 0x10A8);
 			TFT_Width = 320;
-			TFT_Lenght = 240;
+			TFT_Height = 240;
 			break;
 	}
 }
@@ -521,19 +507,51 @@ void TFT_Off(void) {
 void TFT_On(void) {
 	TFT_init(TFT_currentOrientation, _displaySPI);
 }
+//Установить рабочую область от точки (x0,y0) до (x1, y1)
+void TFT_setWindow(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1) {
+	uint16_t x0a, x1a, y0a, y1a;
 
+	switch(TFT_currentOrientation) {
+		case 1:
+			x0a = x0;
+			x1a = x1;
+			y0a = y0;
+			y1a = y1;
 
-//Ограничение рабочей области по оси X
-void TFT_setColumn(uint16_t startX, uint16_t endX) {
-	TFT_sendCmd(0x210,startX);
-	TFT_sendCmd(0x211,endX);
-	TFT_sendCmd(0x200,startX);	
-}
-//Ограничение рабочей области по оси Y
-void TFT_setPage(uint16_t startY, uint16_t endY) {
-	TFT_sendCmd(0x212,startY);
-	TFT_sendCmd(0x213,endY);
-	TFT_sendCmd(0x201,startY);
+			x0 = y0a;
+			x1 = y1a;
+			y0 = TFT_Width - 1 - x1a;
+			y1 = TFT_Width - 1 - x0a;
+			break;
+		case 2:
+			x0a = x0;
+			x1a = x1;
+			y0a = y0;
+			y1a = y1;
+
+			x0 = TFT_Width - 1 - x1a;
+			x1 = TFT_Width - 1 - x0a;
+			y0 = TFT_Height - 1 - y1a;
+			y1 = TFT_Height - 1 - y0a;
+			break;
+		case 3:
+			x0a = x0;
+			x1a = x1;
+			y0a = y0;
+			y1a = y1;
+
+			x0 = TFT_Height - 1 - y1a;
+			x1 = TFT_Height - 1 - y0a;
+			y0 = x0a;
+			y1 = x1a;
+			break;
+	}
+	TFT_sendCmd(0x0210, x0);
+	TFT_sendCmd(0x0211, x1);
+	TFT_sendCmd(0x0212, y0);
+	TFT_sendCmd(0x0213, y1);
+	TFT_sendCmd(0x0200, x0);
+	TFT_sendCmd(0x0201, y0);
 }
 //Установить текущий цвет кисти
 void TFT_setColor(uint16_t color) {
@@ -547,8 +565,7 @@ uint16_t TFT_getColor(void) {
 //Закрасить пиксель по координатам X,Y указанным цветом
 void TFT_drawPixel(uint16_t x, uint16_t y, uint16_t color) {
 	TFT_CS_Reset;					//Обращение к дисплею
-	TFT_setColumn(x,x);		//Указание координаты пикселя по X
-	TFT_setPage(y,y);			//Указание координаты пикселя по Y
+	TFT_setWindow(x,y,x,y);
 	TFT_index;						//Отправка команды
 	TFT_sendData(0x202);	//Команда, значащая что дальше начнётся запись в буфер кадра
 	TFT_data;							//Отправка данных
@@ -577,8 +594,7 @@ void TFT_drawLine(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint8_t si
 //Нарисовать горизонтальную линию начиная с точки (x:y) длиной len указанным цветом
 void TFT_drawLineHorizontal(uint16_t x, uint16_t y, uint16_t len, uint8_t size, uint16_t color) {
 	TFT_CS_Reset;							//Обращение к дисплею
-	TFT_setColumn(x,x+len+size);	//Ограничение области по X
-	TFT_setPage(y,y+size-1);	//Ограничение по Y
+	TFT_setWindow(x,y,x+len+size,y+size-1);
 	TFT_index;								//Отправка команды
 	TFT_sendData(0x202);			//Команда, значащая что дальше начнётся запись в буфер кадра
 	TFT_data;									//Отправка данных
@@ -588,8 +604,7 @@ void TFT_drawLineHorizontal(uint16_t x, uint16_t y, uint16_t len, uint8_t size, 
 //Нарисовать вертикальную линию начиная с точки (x:y) длиной len указанным цветом
 void TFT_drawLineVertical(uint16_t x, uint16_t y, uint16_t len, uint8_t size, uint16_t color) {
 	TFT_CS_Reset;							//Обращение к дисплею
-	TFT_setColumn(x,x+size-1);//Ограничение области по X
-	TFT_setPage(y,y+len-1);			//Ограничение по Y
+	TFT_setWindow(x,y,x+size-1,y+len-1);
 	TFT_index;								//Отправка команды
 	TFT_sendData(0x202);			//Команда, значащая что дальше начнётся запись в буфер кадра
 	TFT_data;									//Отправка данных
@@ -619,12 +634,12 @@ void TFT_drawCircle(uint16_t x, uint16_t y, uint16_t radius, uint8_t size, uint1
 		 delta += 2 * (++x_ - y_--);
 	 }
 }
-//Нарисовать прямоугольник начиная с точки (x:y), с указанной длиной, шириной и цветом
-void TFT_drawRectangle(uint16_t x, uint16_t y, uint16_t lenght, uint16_t width, uint8_t size, uint16_t color) {
-	TFT_drawLineHorizontal(x, y, lenght, size, color);
-	TFT_drawLineHorizontal(x, y+width, lenght, size, color);
+//Нарисовать прямоугольник начиная с точки (x:y), с указанной шириной, висотой, шириной линии и цветом
+void TFT_drawRectangle(uint16_t x, uint16_t y, uint16_t width, uint16_t height, uint8_t size, uint16_t color) {
+	TFT_drawLineHorizontal(x, y, height, size, color);
+	TFT_drawLineHorizontal(x, y+width, height, size, color);
 	TFT_drawLineVertical(x, y, width, size, color);
-	TFT_drawLineVertical(x+lenght, y, width, size, color);
+	TFT_drawLineVertical(x+height, y, width, size, color);
 }
 //Нарисовать треугольник по координатам вершин и указанным цветом
 void TFT_drawTriangle(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint8_t size, uint16_t color) {
@@ -633,15 +648,14 @@ void TFT_drawTriangle(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint16
 	TFT_drawLine(x2, y2, x0, y0, size, color);
 }
 //Залить прямоугольник начиная с точки (x:y), с указанной длиной, шириной и цветом
-void TFT_fillRectangle(uint16_t x, uint16_t y, uint16_t lenght, uint16_t width, uint16_t color) {
+void TFT_fillRectangle(uint16_t x, uint16_t y, uint16_t width, uint16_t height, uint16_t color) {
 	TFT_CS_Reset;									//Обращение к дисплею
-	TFT_setColumn(x,x+lenght-1);		//Ограничение области по X
-	TFT_setPage(y,y+width-1);				//Ограничение области по Y
+	TFT_setWindow(x,y,x+height-1,y+width-1);
 	TFT_index;										//Отправка команды
 	TFT_sendData(0x202);					//Команда, значащая что дальше начнётся запись в буфер кадра
 	TFT_data;											//Отправка данных
 	//Указание цвета закрашивания пикселя	
-	for (uint32_t i = width*lenght; i != 0; i--) {
+	for (uint32_t i = width*height; i != 0; i--) {
 		TFT_sendData(color);
 	}					
 	TFT_CS_Set;										//Окончание общения с дисплеем
@@ -705,15 +719,15 @@ void TFT_drawQuadrant(int16_t x, int16_t y, int16_t radius, uint8_t c, uint8_t s
 }
 
 //Нарисовать прямоугольник с скруглёнными углами начиная с точки (x:y), с указанной длиной, шириной, радиусом скругления и цветом
-void TFT_drawRoundRect(uint16_t x, uint16_t y, uint16_t width, uint16_t length, uint16_t radius, uint16_t size, uint16_t color) {
-  TFT_drawLineHorizontal(x+radius, y, length-2*radius, size, color); // Top
-  TFT_drawLineHorizontal(x+radius, y+width-1, length-2*radius, size, color); // Bottom
+void TFT_drawRoundRect(uint16_t x, uint16_t y, uint16_t width, uint16_t height, uint16_t radius, uint16_t size, uint16_t color) {
+  TFT_drawLineHorizontal(x+radius, y, height-2*radius, size, color); // Top
+  TFT_drawLineHorizontal(x+radius, y+width-1, height-2*radius, size, color); // Bottom
   TFT_drawLineVertical(x, y+radius, width-2*radius, size, color); // Left
-  TFT_drawLineVertical(x+length-1, y+radius, width-2*radius, size, color); // Right
+  TFT_drawLineVertical(x+height-1, y+radius, width-2*radius, size, color); // Right
 
   TFT_drawQuadrant(x+radius, y+radius, radius,1, size, color);
-  TFT_drawQuadrant(x+length-radius-1, y+radius, radius, 2, size, color);
-  TFT_drawQuadrant(x+length-radius-1, y+width-radius-1, radius,  4, size, color);
+  TFT_drawQuadrant(x+height-radius-1, y+radius, radius, 2, size, color);
+  TFT_drawQuadrant(x+height-radius-1, y+width-radius-1, radius,  4, size, color);
   TFT_drawQuadrant(x+radius, y+width-radius-1, radius, 8, size, color);
 }
 //Функция для закрашивания четверти круга с центром (x:y), с указанным радиусом, фазой и цветом
@@ -746,10 +760,10 @@ void TFT_fillQuadrant(int16_t x, int16_t y, int16_t radius, uint8_t c, int16_t d
 }
 
 //Закрасить прямоугольник с скруглёнными углами начиная с точки (x:y), с указанной длиной, шириной, радиусом скругления и цветом
-void TFT_fillRoundRect(uint16_t x, uint16_t y, uint16_t width, uint16_t length, uint16_t radius, uint16_t size, uint16_t color) {
-  TFT_fillRectangle(x+radius, y, length-2*radius, width, color);
+void TFT_fillRoundRect(uint16_t x, uint16_t y, uint16_t width, uint16_t height, uint16_t radius, uint16_t size, uint16_t color) {
+  TFT_fillRectangle(x+radius, y, height-2*radius, width, color);
 
-  TFT_fillQuadrant(x+length-radius-1, y+radius, radius, 1, width-2*radius-1, color);
+  TFT_fillQuadrant(x+height-radius-1, y+radius, radius, 1, width-2*radius-1, color);
   TFT_fillQuadrant(x+radius, y+radius, radius, 2, width-2*radius-1, color);
 }
 
@@ -758,20 +772,8 @@ void TFT_printChar(uint8_t casc, uint8_t postion_x, uint8_t postion_y) {
 	uint8_t *p;
 	
 	TFT_CS_Reset;
-	//Портретная ориентация
-//	TFT_sendCmd(0x210,postion_x*8); 	//x start point
-//	TFT_sendCmd(0x212,postion_y*16); 	//y start point
-//	TFT_sendCmd(0x211,postion_x*8+7);	//x end point
-//	TFT_sendCmd(0x213,postion_y*16+15);	//y end point
-//	TFT_sendCmd(0x200,postion_x*8);	
-//	TFT_sendCmd(0x201,postion_y*16);
-	//Горизонтальная ориентация
-	TFT_sendCmd(0x210,postion_x*16); 	//x start point
-	TFT_sendCmd(0x212,postion_y*8); 	//y start point
-	TFT_sendCmd(0x211,postion_x*16+15);	//x end point
-	TFT_sendCmd(0x213,postion_y*8+7);	//y end point
-	TFT_sendCmd(0x200,postion_x*16);	
-	TFT_sendCmd(0x201,postion_y*8);
+
+	TFT_setWindow(postion_x*8,postion_y*16,postion_x*8+7,postion_y*16+15);
 	
 	TFT_index;
 	TFT_sendData(0x202);
@@ -806,22 +808,8 @@ void TFT_printChar_Reverse(uint8_t casc,uint8_t postion_x,uint8_t postion_y)
 	uint8_t *p;
 	
 	TFT_CS_Reset;
-	//Портретная ориентация
-//	TFT_sendCmd(0x210,postion_x*8); 	//x start point
-//	TFT_sendCmd(0x212,postion_y*16); 	//y start point
-//	TFT_sendCmd(0x211,postion_x*8+7);	//x end point
-//	TFT_sendCmd(0x213,postion_y*16+15);	//y end point
-
-//	TFT_sendCmd(0x200,postion_x*8);	
-//	TFT_sendCmd(0x201,postion_y*16);
-	//Горизонтальная ориентация
-	TFT_sendCmd(0x210,postion_x*8); 	//x start point
-	TFT_sendCmd(0x212,postion_y*16); 	//y start point
-	TFT_sendCmd(0x211,postion_x*8+7);	//x end point
-	TFT_sendCmd(0x213,postion_y*16+15);	//y end point
-
-	TFT_sendCmd(0x200,postion_x*8);	
-	TFT_sendCmd(0x201,postion_y*16);
+	
+	TFT_setWindow(postion_x*8,postion_y*16,postion_x*8+7,postion_y*16+15);
 	
 	TFT_index;
 	TFT_sendData(0x202);

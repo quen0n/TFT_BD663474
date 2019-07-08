@@ -89,10 +89,10 @@ typedef struct xy {
 
 //Ориентации дисплея
 enum ORIENTATION {
-	TFT_ORIENT_LANDSCAPE, 		//Альбомная ориентация (левый верхний угол со стороны вывода №1)
-	TFT_ORIENT_LANDSCAPE_180,	//Альбомная ориентация (левый верхний угол со стороны шлейфа тачскрина)
 	TFT_ORIENT_PORTRAIT,			//Портретная ориентация (верх со стороны 1-го пина)
+	TFT_ORIENT_LANDSCAPE_180,	//Альбомная ориентация (левый верхний угол со стороны шлейфа тачскрина)
 	TFT_ORIENT_PORTRAIT_180,	//Портретная ориентация (верх со стороны 40-го пина)
+	TFT_ORIENT_LANDSCAPE, 		//Альбомная ориентация (левый верхний угол со стороны вывода №1)
 };
 
 
@@ -122,14 +122,12 @@ void TFT_printChar(uint8_t casc, uint8_t postion_x, uint8_t postion_y);
 void TFT_Off(void);
 //Включить дисплей
 void TFT_On(void);
-//Ограничение рабочей области по оси X
-void TFT_setColumn(uint16_t startX, uint16_t endX);
-//Ограничение рабочей области по оси Y
-void TFT_setPage(uint16_t startY, uint16_t endY);
 //Установить текущий цвет кисти
 void TFT_setColor(uint16_t color);
 //Получить текущий цвет кисти
 uint16_t TFT_getColor(void);
+//Установить рабочую область от точки (x0,y0) до (x1, y1)
+void TFT_setWindow(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1);
 
 //Закрасить пиксель по координатам X,Y указанным цветом
 void TFT_drawPixel(uint16_t x, uint16_t y, uint16_t color);
@@ -141,14 +139,14 @@ void TFT_drawLineHorizontal(uint16_t x, uint16_t y, uint16_t len, uint8_t size, 
 void TFT_drawLineVertical(uint16_t x, uint16_t y, uint16_t len, uint8_t size, uint16_t color);
 //Нарисовать окружность с центром в координате (x,y), радиусом radius и указанным цветом
 void TFT_drawCircle(uint16_t x, uint16_t y, uint16_t radius, uint8_t size, uint16_t color);
-//Нарисовать прямоугольник начиная с точки (x:y), с указанной длиной, шириной и цветом
-void TFT_drawRectangle(uint16_t x, uint16_t y, uint16_t length, uint16_t width, uint8_t size, uint16_t color);
+//Нарисовать прямоугольник начиная с точки (x:y), с указанной шириной, висотой, шириной линии и цветом
+void TFT_drawRectangle(uint16_t x, uint16_t y, uint16_t width, uint16_t height, uint8_t size, uint16_t color);
 //Нарисовать треугольник по координатам вершин и указанным цветом
 void TFT_drawTriangle(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint8_t size, uint16_t color);
 //Функция для рисования четверти круга с центром (x:y), с указанным радиусом, фазой и цветом
 void TFT_drawQuadrant(int16_t x, int16_t y, int16_t radius, uint8_t size, uint8_t c, uint16_t color);
 //Нарисовать прямоугольник с скруглёнными углами начиная с точки (x:y), с указанной длиной, шириной, радиусом скругления и цветом
-void TFT_drawRoundRect(uint16_t x, uint16_t y, uint16_t width, uint16_t length, uint16_t radius, uint16_t size, uint16_t color);
+void TFT_drawRoundRect(uint16_t x, uint16_t y, uint16_t width, uint16_t height, uint16_t radius, uint16_t size, uint16_t color);
 
 //Залить прямоугольник начиная с точки (x:y), с указанной длиной, шириной и цветом
 void TFT_fillRectangle(uint16_t x, uint16_t y, uint16_t lenght, uint16_t width, uint16_t color);
@@ -157,7 +155,7 @@ void TFT_fillCircle(uint16_t x, uint16_t y, uint16_t radius, uint16_t color);
 //Функция для закрашивания четверти круга с центром (x:y), с указанным радиусом, фазой и цветом
 void TFT_fillQuadrant(int16_t x, int16_t y, int16_t radius, uint8_t c, int16_t delta, uint16_t color);
 //Закрасить прямоугольник с скруглёнными углами начиная с точки (x:y), с указанной длиной, шириной, радиусом скругления и цветом
-void TFT_fillRoundRect(uint16_t x, uint16_t y, uint16_t width, uint16_t length, uint16_t radius, uint16_t size, uint16_t color);
+void TFT_fillRoundRect(uint16_t x, uint16_t y, uint16_t width, uint16_t height, uint16_t radius, uint16_t size, uint16_t color);
 
 
 
