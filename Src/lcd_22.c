@@ -564,25 +564,25 @@ void TFT_drawLine(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint8_t si
 	}
 }
 //Нарисовать горизонтальную линию начиная с точки (x:y) длиной len указанным цветом
-void TFT_drawLineHorizontal(uint16_t x, uint16_t y, uint16_t len, uint16_t color) {
+void TFT_drawLineHorizontal(uint16_t x, uint16_t y, uint16_t len, uint8_t size, uint16_t color) {
 	TFT_CS_Reset;							//Обращение к дисплею
 	TFT_setColumn(x,x+len);		//Ограничение области по X
-	TFT_setPage(y,y);					//Ограничение по Y
+	TFT_setPage(y,y+size-1);	//Ограничение по Y
 	TFT_index;								//Отправка команды
 	TFT_sendData(0x202);			//Команда, значащая что дальше начнётся запись в буфер кадра
 	TFT_data;									//Отправка данных
-	for(uint16_t i = 0; i < len; i++) TFT_sendData(color); //Рисование линии указанным цветом
+	for(uint16_t i = 0; i < len*size; i++) TFT_sendData(color); //Рисование линии указанным цветом
 	TFT_CS_Set;								//Окончание общения с дисплеем
 }
 //Нарисовать вертикальную линию начиная с точки (x:y) длиной len указанным цветом
-void TFT_drawLineVertical(uint16_t x, uint16_t y, uint16_t len, uint16_t color) {
+void TFT_drawLineVertical(uint16_t x, uint16_t y, uint16_t len, uint8_t size, uint16_t color) {
 	TFT_CS_Reset;							//Обращение к дисплею
-	TFT_setColumn(x,x);				//Ограничение области по X
+	TFT_setColumn(x,x+size-1);//Ограничение области по X
 	TFT_setPage(y,y+len);			//Ограничение по Y
 	TFT_index;								//Отправка команды
 	TFT_sendData(0x202);			//Команда, значащая что дальше начнётся запись в буфер кадра
 	TFT_data;									//Отправка данных
-	for(uint16_t i = 0; i < len; i++) TFT_sendData(color); //Рисование линии указанным цветом
+	for(uint16_t i = 0; i < len*size; i++) TFT_sendData(color); //Рисование линии указанным цветом
 	TFT_CS_Set;								//Окончание общения с дисплеем
 }
 //Нарисовать окружность с центром в координате (x,y), радиусом radius и указанным цветом
@@ -642,8 +642,8 @@ void TFT_fillCircle(uint16_t x, uint16_t y, uint16_t radius, uint16_t color) {
    int16_t delta = 1 - 2 * radius;
    int16_t error = 0;
    while (y_ >= 0) {
-		 TFT_drawLineVertical(x - x_, y - y_, y_*2, color);
-		 TFT_drawLineVertical(x + x_, y - y_, y_*2, color);
+		 TFT_drawLineVertical(x - x_, y - y_, y_*2, 1, color);
+		 TFT_drawLineVertical(x + x_, y - y_, y_*2, 1, color);
 		 
 		 error = 2 * (delta + y_) - 1;
 		 if ((delta < 0) && (error <= 0)) {
@@ -724,12 +724,12 @@ void TFT_fillQuadrant(int16_t x, int16_t y, int16_t radius, uint8_t c, int16_t d
     f     += ddF_x;
 
     if (c & 0x1) {
-      TFT_drawLineVertical(x+x_, y-y_, 2*y_+1+delta, color);
-      TFT_drawLineVertical(x+y_, y-x_, 2*x_+1+delta, color);
+      TFT_drawLineVertical(x+x_, y-y_, 2*y_+1+delta, 1, color);
+      TFT_drawLineVertical(x+y_, y-x_, 2*x_+1+delta, 1, color);
     }
     if (c & 0x2) {
-     TFT_drawLineVertical(x-x_, y-y_, 2*y_+1+delta, color);
-     TFT_drawLineVertical(x-y_, y-x_, 2*x_+1+delta, color);
+     TFT_drawLineVertical(x-x_, y-y_, 2*y_+1+delta, 1, color);
+     TFT_drawLineVertical(x-y_, y-x_, 2*x_+1+delta, 1, color);
     }
   }
 }

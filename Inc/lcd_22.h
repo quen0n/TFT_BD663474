@@ -124,9 +124,9 @@ void TFT_drawPixel(uint16_t x, uint16_t y, uint16_t color);
 //Нарисовать линию начиная с x0,y0, заканчивая x1,y1 указанным цветом
 void TFT_drawLine(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint8_t size, uint16_t color);
 //Нарисовать горизонтальную линию начиная с точки (x:y) длиной len указанным цветом
-void TFT_drawLineHorizontal(uint16_t x, uint16_t y, uint16_t len, uint16_t color);
+void TFT_drawLineHorizontal(uint16_t x, uint16_t y, uint16_t len, uint8_t size, uint16_t color);
 //Нарисовать вертикальную линию начиная с точки (x:y) длиной len указанным цветом
-void TFT_drawLineVertical(uint16_t x, uint16_t y, uint16_t len, uint16_t color);
+void TFT_drawLineVertical(uint16_t x, uint16_t y, uint16_t len, uint8_t size, uint16_t color);
 //Нарисовать окружность с центром в координате (x,y), радиусом radius и указанным цветом
 void TFT_drawCircle(uint16_t x, uint16_t y, uint16_t radius, uint8_t size, uint16_t color);
 //Нарисовать прямоугольник начиная с точки (x:y), с указанной длиной, шириной и цветом
@@ -168,7 +168,6 @@ drawBitmap - нарисовать картинку
 backlightOn/off - включить/выключить подсветку (опционально)
 
 Исправить косяки с ориентацией
-Добавить параметр толщины для горизонтальных и вертикальных линий
 Оптимизоровать рисование прямоугольников 
 */
 
