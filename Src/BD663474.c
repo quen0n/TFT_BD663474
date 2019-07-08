@@ -1,7 +1,7 @@
 /*
 *========================================================================================================
 *
-* File                : LCD_22.C
+* File                : BD663474.C
 * Hardware Environment: STM32F446
 * Build Environment   : Keil uVision 5
 * Version             : 1.0
@@ -12,7 +12,7 @@
 *========================================================================================================
 */
 
-#include "LCD_22.h"
+#include "BD663474.h"
 #include <stdlib.h>
 //Шрифт
 unsigned char ascii[]= {
@@ -277,10 +277,9 @@ unsigned char ascii[]= {
 };
 
 /* Глобальные переменные */
-//Интерфейсы SPI для коммуникации с дисплеем и тачскрином
+//Интерфейс SPI для коммуникации с дисплеем
 #ifndef TFT_SOFTSPI
 SPI_HandleTypeDef *_displaySPI;
-SPI_HandleTypeDef *_touchSPI;
 #endif
 //Размеры дисплея по горизонтали и вертикали (меняются при изменении ориентации экрана)
 uint16_t TFT_Width, TFT_Height;
@@ -288,11 +287,6 @@ uint16_t TFT_Width, TFT_Height;
 uint8_t TFT_currentOrientation;
 //Текущий цвет кисти
 uint16_t currentColor;
-//TODO: Хрензнайт что это, разобраться
-volatile xy_t touch_xy_buffer[TOUCH_MAX_CACHE];
-volatile uint8_t touch_wr_index;
-volatile uint8_t touch_rd_index;
-volatile uint8_t touch_counter;
 
 //Аппаратная перезагрузка дисплея
 void TFT_reset(void) {
@@ -576,17 +570,17 @@ void TFT_drawLine(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint8_t si
 //Нарисовать горизонтальную линию начиная с точки (x:y) длиной len указанным цветом
 void TFT_drawLineHorizontal(uint16_t x, uint16_t y, uint16_t len, uint8_t size, uint16_t color) {
 	TFT_CS_Reset;							//Обращение к дисплею
-	TFT_setWindow(x,y,x+len,y+size-1);
+	TFT_setWindow(x,y,x+len-1,y+size-1);
 	TFT_index;								//Отправка команды
 	TFT_sendData(0x202);			//Команда, значащая что дальше начнётся запись в буфер кадра
 	TFT_data;									//Отправка данных
-	for(uint16_t i = 0; i < len*size+size*size; i++) TFT_sendData(color); //Рисование линии указанным цветом
+	for(uint16_t i = 0; i < len*size; i++) TFT_sendData(color); //Рисование линии указанным цветом
 	TFT_CS_Set;								//Окончание общения с дисплеем
 }
 //Нарисовать вертикальную линию начиная с точки (x:y) длиной len указанным цветом
 void TFT_drawLineVertical(uint16_t x, uint16_t y, uint16_t len, uint8_t size, uint16_t color) {
 	TFT_CS_Reset;							//Обращение к дисплею
-	TFT_setWindow(x,y,x+size-1,y+len);
+	TFT_setWindow(x,y,x+size-1,y+len-1);
 	TFT_index;								//Отправка команды
 	TFT_sendData(0x202);			//Команда, значащая что дальше начнётся запись в буфер кадра
 	TFT_data;									//Отправка данных
@@ -600,9 +594,9 @@ void TFT_drawCircle(uint16_t x, uint16_t y, uint16_t radius, uint8_t size, uint1
    int16_t delta = 1 - 2 * radius;
    int16_t error = 0;
    while (y_ >= 0) {
-		 TFT_fillRectangle(x + x_, y + y_, size, size, color);
-		 TFT_fillRectangle(x + x_, y - y_, size, size, color);
-		 TFT_fillRectangle(x - x_, y + y_, size, size, color);
+		 TFT_fillRectangle(x + x_-size+1, y + y_-size, size, size, color);
+		 TFT_fillRectangle(x + x_-size+1, y - y_, size, size, color);
+		 TFT_fillRectangle(x - x_, y + y_-size, size, size, color);
 		 TFT_fillRectangle(x - x_, y - y_, size, size, color);
 		 error = 2 * (delta + y_) - 1;
 		 if ((delta < 0) && (error <= 0)) {
@@ -619,9 +613,9 @@ void TFT_drawCircle(uint16_t x, uint16_t y, uint16_t radius, uint8_t size, uint1
 //Нарисовать прямоугольник начиная с точки (x:y), с указанной шириной, висотой, шириной линии и цветом
 void TFT_drawRectangle(uint16_t x, uint16_t y, uint16_t width, uint16_t height, uint8_t size, uint16_t color) {
 	TFT_drawLineHorizontal(x, y, width, size, color);
-	TFT_drawLineHorizontal(x, y+height, width, size, color);
+	TFT_drawLineHorizontal(x, y+height-size, width, size, color);
 	TFT_drawLineVertical(x, y, height, size, color);
-	TFT_drawLineVertical(x+width, y, height, size, color);
+	TFT_drawLineVertical(x+width-size, y, height, size, color);
 }
 //Нарисовать треугольник по координатам вершин и указанным цветом
 void TFT_drawTriangle(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint8_t size, uint16_t color) {
@@ -703,14 +697,14 @@ void TFT_drawQuadrant(int16_t x, int16_t y, int16_t radius, uint8_t c, uint8_t s
 //Нарисовать прямоугольник с скруглёнными углами начиная с точки (x:y), с указанной длиной, шириной, радиусом скругления и цветом
 void TFT_drawRoundRect(uint16_t x, uint16_t y, uint16_t width, uint16_t height, uint16_t radius, uint16_t size, uint16_t color) {
   TFT_drawLineHorizontal(x+radius, y, width-2*radius, size, color); // Top
-  TFT_drawLineHorizontal(x+radius, y+height-1, width-2*radius, size, color); // Bottom
+  TFT_drawLineHorizontal(x+radius, y+height-size, width-2*radius, size, color); // Bottom
   TFT_drawLineVertical(x, y+radius, height-2*radius, size, color); // Left
-  TFT_drawLineVertical(x+width-1, y+radius, height-2*radius, size, color); // Right
+  TFT_drawLineVertical(x+width-size, y+radius, height-2*radius, size, color); // Right
 
   TFT_drawQuadrant(x+radius, y+radius, radius,1, size, color);
-  TFT_drawQuadrant(x+width-radius-1, y+radius, radius, 2, size, color);
-  TFT_drawQuadrant(x+width-radius-1, y+height-radius-1, radius,  4, size, color);
-  TFT_drawQuadrant(x+radius, y+height-radius-1, radius, 8, size, color);
+  TFT_drawQuadrant(x+width-radius-size, y+radius, radius, 2, size, color);
+  TFT_drawQuadrant(x+width-radius-size, y+height-radius-size, radius,  4, size, color);
+  TFT_drawQuadrant(x+radius, y+height-radius-size, radius, 8, size, color);
 }
 //Функция для закрашивания четверти круга с центром (x:y), с указанным радиусом, фазой и цветом
 void TFT_fillQuadrant(int16_t x, int16_t y, int16_t radius, uint8_t c, int16_t delta, uint16_t color) {
@@ -755,7 +749,14 @@ void LCD_test(void) {
 	//Нужно для печати информации о скорости выполнения теста
 	char buff[128];
 	uint32_t starttime = HAL_GetTick();
+	/* Тест 0. Заливка дисплея сплошным цветом */
+	TFT_clear();
+	sprintf(buff, "%d", HAL_GetTick()-starttime);
+	DisplayString(buff,TFT_Width-1, TFT_Height-1,0);
+	HAL_Delay(1500);
 	/* Тест 1. Заливка дисплея всеми основными цветами */
+	TFT_clear();
+	starttime = HAL_GetTick();
 	TFT_CS_Reset;	
 
 	TFT_setWindow(0,0, TFT_Width-1, TFT_Height-1);
@@ -890,10 +891,10 @@ void TFT_printChar_Reverse(uint8_t casc,uint8_t postion_x,uint8_t postion_y)
 	TFT_CS_Set;
 }
 
-uint8_t* swap(uint8_t *s,uint8_t sz)
+char* swap(char *s,uint8_t sz)
 {
     uint8_t i=0;
-    static uint8_t b[10]={0};
+    static char b[10]={0};
     s+=sz-2;
     for(i=0;i<sz-1;i++)
     {
@@ -904,8 +905,8 @@ uint8_t* swap(uint8_t *s,uint8_t sz)
     return s;
 }
 
-void DisplayString(uint8_t *s,uint8_t x,uint8_t y,uint8_t Reverse) {
-	uint8_t a[10],i;
+void DisplayString(char *s,uint8_t x,uint8_t y,uint8_t Reverse) {
+	char a[10],i;
 	if(Reverse)	{
 		i=0;
 		while(*s){a[i]=*s;s++;i++;}
@@ -926,116 +927,3 @@ void DisplayString(uint8_t *s,uint8_t x,uint8_t y,uint8_t Reverse) {
 		s++;
 	}
 }
-/*
-uint16_t get_touch_data(uint16_t cmd)
-{
-	uint8_t buff[2];
-	uint8_t tmp;
-	SSPBUF = cmd;
-	while(!SSPIF);
-	SSPIF=0;
-
-	SSPBUF = 0;
-	while(!SSPIF);
-	SSPIF=0;
-
-	tmp =SSPBUF;
-
-	SSPBUF = 0;
-	while(!SSPIF);
-	SSPIF=0;
-	//HAL_SPI_Receive(_touchSPI, (uint8_t *)buff, 2, 0xFF);
-
-	return ( ((uint16_t)buff[0])<<5 | ((uint16_t)buff[1])>>3);
-}
-
-xy_t get_touch_xy(void)
-{
-	xy_t tmp_xy;
-	if(!PENIRQ){
-		tmp_xy.x = get_touch_data(TOUCH_CMD_X);
-	    tmp_xy.y = get_touch_data(TOUCH_CMD_Y);
-	} else{
-		tmp_xy.x = 0xFFFF;
-	    tmp_xy.y = 0xFFFF;
-	}
-	return tmp_xy;
-}
-
-uint8_t get_point_xy(void)
-{
-	uint8_t n,m,tmp;
-	xy_t tmp_xy_buf[SAMP_COUNT], tmp_xy;
-	uint32_t tmp_x = ((uint32_t)tmp_xy_buf[SAMP_COUNT/2].x + (uint32_t)tmp_xy_buf[SAMP_COUNT/2-1].x)/2;
-	uint32_t tmp_y = ((uint32_t)tmp_xy_buf[SAMP_COUNT/2].y + (uint32_t)tmp_xy_buf[SAMP_COUNT/2-1].y)/2;
-	
-	if(touch_counter>=(TOUCH_MAX_CACHE-1)){
-		return 0;
-	}
-	Touch_CS_Reset;
-	//xy_t tmp_xy_buf[SAMP_COUNT], tmp_xy;
-	for(n=0; n<SAMP_COUNT; n++){
-		tmp_xy_buf[n] = get_touch_xy();
-	}
-	Touch_CS_Set;
-	for(n=0; n<(SAMP_COUNT-1); n++){
-		for(m=0; m<(SAMP_COUNT-n-1); m++){
-			tmp = m+1;
-			if((tmp_xy_buf[m].x + tmp_xy_buf[m].y) > (tmp_xy_buf[tmp].x + tmp_xy_buf[tmp].y)){
-				tmp_xy = tmp_xy_buf[tmp];
-				tmp_xy_buf[tmp] = tmp_xy_buf[m];
-				tmp_xy_buf[m] = tmp_xy;
-			}
-		}
-	}
-	if((tmp_xy_buf[SAMP_COUNT/2].x - tmp_xy_buf[SAMP_COUNT/2-1].x > SAMP_THRESHOLD) 
-		|| (tmp_xy_buf[SAMP_COUNT/2].y - tmp_xy_buf[SAMP_COUNT/2-1].y > SAMP_THRESHOLD)){
-		return 0;
-	}
-
-	if(tmp_x >= 0xFFF || tmp_y >= 0xFFF){
-		return 0;
-	}
- 	touch_xy_buffer[touch_wr_index].x = ((tmp_x * 240)>>12);
-	touch_xy_buffer[touch_wr_index].y = ((tmp_y * 320)>>12);
-	if(touch_wr_index < (TOUCH_MAX_CACHE-1)){
-		touch_wr_index++;
-	}else{
-		touch_wr_index = 0;
-	}
-	touch_counter++;
-	return 1;
-}
-
-uint8_t draw_lcd(void)
-{
-	uint8_t n;
-	TFT_CS_Reset;
-	if(touch_counter==0){
-		return 0;
-	}
-	
-	touch_counter--;
-
-	TFT_sendCmd(0x210,touch_xy_buffer[touch_rd_index].x);
-	TFT_sendCmd(0x212,touch_xy_buffer[touch_rd_index].y);
-	TFT_sendCmd(0x211,touch_xy_buffer[touch_rd_index].x+(DOT_WIDTH-1));
-	TFT_sendCmd(0x213,touch_xy_buffer[touch_rd_index].y+(DOT_WIDTH-1));
-	if(touch_rd_index < (TOUCH_MAX_CACHE-1)){
-		touch_rd_index++;
-	}else{
-		touch_rd_index = 0;
-	}
-	//TFT_sendCmd(0x0005,0x0010);
-
-	TFT_index;
-	TFT_sendData(0x202);
-	TFT_data;
-	for(n=0; n< (DOT_WIDTH*DOT_WIDTH); n++)
-	{
-		TFT_sendData(TFT_COLOR_Black);
-	}
-	TFT_CS_Set;
-	return 1;
-}
-*/

@@ -1,7 +1,7 @@
 /*
 *========================================================================================================
 *
-* File                : LCD_22.C
+* File                : BD663474.C
 * Hardware Environment: STM32F446
 * Build Environment   : Keil uVision 5
 * Version             : 1.0
@@ -12,8 +12,8 @@
 *========================================================================================================
 */
 
-#ifndef LCD_22_H
-#define LCD_22_H
+#ifndef BD663474_H
+#define BD663474_H
 
 #include "main.h"
 #include <stdio.h>
@@ -22,12 +22,6 @@
 #define delay_ms(d) HAL_Delay(d)
 
 /* Макросы взаимодействия с портами ввода/вывода */
-//Чтение логического уровня на пине прерывания от тачскрина
-#define PENIRQ						(HAL_GPIO_ReadPin(T_IRQ_GPIO_Port, T_IRQ_Pin) == GPIO_PIN_SET)
-//Опускание/поднятие логического уровня CS тачскрина
-#define Touch_CS_Reset		HAL_GPIO_WritePin(T_CS_GPIO_Port, T_CS_Pin, GPIO_PIN_RESET)
-#define Touch_CS_Set			HAL_GPIO_WritePin(T_CS_GPIO_Port, T_CS_Pin, GPIO_PIN_SET)
-//Опускание/поднятие логического уровня ножки сброса дисплея
 #define TFT_RESET_Reset		HAL_GPIO_WritePin(RESET_GPIO_Port, RESET_Pin, GPIO_PIN_RESET)  
 #define TFT_RESET_Set			HAL_GPIO_WritePin(RESET_GPIO_Port, RESET_Pin, GPIO_PIN_SET)
 //Опускание/поднятие логического уровня CS дисплея
@@ -48,14 +42,6 @@
 #define TFT_SCK_Set			HAL_GPIO_WritePin(SPI_SCK_GPIO_Port, SPI_SCK_Pin, GPIO_PIN_SET)
 #define TFT_SCK_Reset		HAL_GPIO_WritePin(SPI_SCK_GPIO_Port, SPI_SCK_Pin, GPIO_PIN_RESET)
 #endif
-
-//TODO: Разобраться что за макросы
-#define SAMP_COUNT				5
-#define SAMP_THRESHOLD		5
-#define DOT_WIDTH 4
-#define TOUCH_CMD_X 		0xD0
-#define TOUCH_CMD_Y 		0x90
-#define TOUCH_MAX_CACHE 8
 
 //Преобразование RGB в 16-ти битный формат 565
 #define	TFT_RGB(R, G, B)	(((B >> 3)) | ((G >> 2) << 5) | ((R >> 3) << 11))
@@ -81,12 +67,6 @@ enum COLOR{
 };
 //Текущий цвет, который установлен функцией TFT_setColor()
 #define TFT_COLOR_CURRENT TFT_getColor()
-
-//Структура для координат нажатия на тачскрин 
-typedef struct xy {
-	uint16_t x;
-	uint16_t y;
-} xy_t;
 
 //Ориентации дисплея
 enum ORIENTATION {
@@ -161,11 +141,6 @@ void TFT_fillQuadrant(int16_t x, int16_t y, int16_t radius, uint8_t c, int16_t d
 //Закрасить прямоугольник с скруглёнными углами начиная с точки (x:y), с указанной длиной, шириной, радиусом скругления и цветом
 void TFT_fillRoundRect(uint16_t x, uint16_t y, uint16_t width, uint16_t height, uint16_t radius, uint16_t color);
 
-
-
-/* Функции работы с тачскрином */
-
-
 /*TODO: Функции, которые нужно реализовать
 + init(orientation) - в инициализации указывать ориентацию дисплея
 + setOrientation - повернуть дисплей
@@ -180,21 +155,10 @@ setFont - установить текущий шрифт
 printChar - напечатать символ
 print - напечатать слово
 drawBitmap - нарисовать картинку
-backlightOn/off - включить/выключить подсветку (опционально)
 
-Исправить косяки с ориентацией
-Проверить длины линий и фигур
-Написать нормальные тесты
+Исправить косячки в тестах
 */
-
 
 //Прочее говно
-/*
-uint16_t get_touch_data(uint16_t cmd);
-xy_t get_touch_xy(void);
-uint8_t get_point_xy(void);
-uint8_t draw_lcd(void);
-void init_lcd(void);
-*/
-void DisplayString(uint8_t *s,uint8_t x,uint8_t y,uint8_t Reverse);
+void DisplayString(char *s,uint8_t x,uint8_t y,uint8_t Reverse);
 #endif

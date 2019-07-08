@@ -2,5 +2,5 @@
 !*/
 !.gitignore
 !Inc/asciihex8X16.h
-!Inc/lcd_22.h
-!Src/lcd_22.c
+!Inc/BD663474.h
+!Src/BD663474.c
