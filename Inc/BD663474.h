@@ -111,9 +111,13 @@ void TFT_setColor(uint16_t color);
 uint16_t TFT_getColor(void);
 //Установить рабочую область от точки (x0,y0) до (x1, y1)
 void TFT_setWindow(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1);
+//Получить текущее положение курсора по X
+uint16_t TFT_getCursorX(void);
+//Получить текущее положение курсора по Y
+uint16_t TFT_getCursorY(void);
 
+//Функция тестирования работы дисплея
 void TFT_test(void);
-
 
 //Закрасить пиксель по координатам X,Y указанным цветом
 void TFT_drawPixel(uint16_t x, uint16_t y, uint16_t color);

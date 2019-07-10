@@ -26,6 +26,8 @@ uint16_t TFT_Width, TFT_Height;
 uint8_t TFT_currentOrientation;
 //Текущий цвет кисти
 uint16_t currentColor;
+//Координаты курсора по X и Y
+uint16_t TFT_cursorX, TFT_cursorY;
 
 //Аппаратная перезагрузка дисплея
 void TFT_reset(void) {
@@ -64,7 +66,6 @@ void TFT_init(uint8_t orientation) {
 	TFT_sendCmd(0x001, 0x0100); 	//Ориентация дисплея: 0x0100 - сверху вниз, 0x0000 - снизу вверх. Можно отзеркалить изображение 	
 	TFT_sendCmd(0x002, 0x0000);		//Установка формы сигнала драйвера
 	TFT_sendCmd(0x003, 0x1230);		//Режим ввода
-	//TODO: Команду установки ориентации дисплея
 	//0xXXX0 - ввод по короткой стороне (по ширине), 0xXXX8 - по длинной (по длине)
 	//0xXXnX - инкремент/декремент по длине и ширине
 	TFT_sendCmd(0x006, 0x0000);		//Контроль движения изображения
@@ -275,6 +276,19 @@ void TFT_setColor(uint16_t color) {
 //Получить текущий цвет кисти
 uint16_t TFT_getColor(void) {
 	return currentColor;
+}
+//Установить координаты курсора по X и Y
+void TFT_setCursor(uint16_t X, uint16_t Y) {
+	TFT_cursorX = X;
+	TFT_cursorY = Y;
+}
+//Получить текущее положение курсора по X
+uint16_t TFT_getCursorX(void) {
+	return TFT_cursorX;
+}
+//Получить текущее положение курсора по Y
+uint16_t TFT_getCursorY(void) {
+	return TFT_cursorY;
 }
 
 //Закрасить пиксель по координатам X,Y указанным цветом
