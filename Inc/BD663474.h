@@ -18,6 +18,8 @@
 #include "main.h"
 #include <stdio.h>
 
+extern unsigned char ascii[];
+
 //Макрос задержки в мс
 #define delay_ms(d) HAL_Delay(d)
 
