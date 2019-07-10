@@ -14,6 +14,7 @@
 
 #include "BD663474.h"
 #include <stdlib.h>
+#include "BD663474_fonts.h"
 
 /* Глобальные переменные */
 //Интерфейс SPI для коммуникации с дисплеем
@@ -28,7 +29,10 @@ uint8_t TFT_currentOrientation;
 uint16_t currentColor;
 //Координаты курсора по X и Y
 uint16_t TFT_cursorX, TFT_cursorY;
-
+//Текущий шрифт
+TFT_font *currentFont = &mono5x8;
+//Текущий размер шрифта
+uint8_t currentFontSize = 2;
 //Аппаратная перезагрузка дисплея
 void TFT_reset(void) {
 	TFT_RESET_Reset;
@@ -595,113 +599,77 @@ void TFT_test(void) {
 	DisplayString(buff,TFT_Width-1, TFT_Height-1,0);
 	HAL_Delay(1500);
 }
-
-
-
-void TFT_printChar(uint8_t casc, uint8_t postion_x, uint8_t postion_y) {
-	uint8_t i,j,b;
-	const uint8_t *p;
-	
-	TFT_CS_Reset;
-
-	TFT_setWindow(postion_x*8,postion_y*16,postion_x*8+7,postion_y*16+15);
-	
-	TFT_index;
-	TFT_sendData(0x202);
-	TFT_data;
-	p=ascii;
-	p+=casc*16;
-	//8
-	for(j=0;j<16;j++)
-	{
-		b=*(p+j);
-		//16
-		for(i=0;i<8;i++)
-		{
-			if(b&0x80)
-			{
-				TFT_sendData(TFT_COLOR_Black);
+//Печать символа на экране
+void TFT_printChar(char c) {
+	//Проверка возможности печати на текущих координатах
+	if (TFT_cursorX >= TFT_Width-5*currentFontSize) {//currentFont -> width
+		TFT_cursorY += 8*currentFontSize; //currentFont ->height
+		TFT_cursorX = 0;
+	}		 
+	if (TFT_cursorY >= TFT_Height - 8*currentFontSize) TFT_cursorY = 0; //currentFont -> height
+	//Уменьшение числа символа до индекса в массиве шрифтов
+	if (c > 127) {
+			c -= 96;
+	} else c -= 32;
+	//currentFont -> width
+	//Перебор байтов битмепа шрифта
+	//volatile uint8_t fontWidth = currentFont -> width;
+	for(uint8_t byteNumber = 0; byteNumber < 5; byteNumber++) {
+		//Перебор битов байта битмепа шрифта
+		for(uint8_t bitNumber = 0; bitNumber < 8; bitNumber++) {
+			//Рисование символа
+			//Если значение бита истиное, то рисование квадратика заданного размера
+			if((currentFont -> bitmap[byteNumber+c*5] & (1<<bitNumber))) {
+				TFT_fillRectangle(TFT_cursorX+byteNumber*currentFontSize, TFT_cursorY+bitNumber*currentFontSize, currentFontSize, currentFontSize, currentColor); 
 			}
-			else
-			{
-				TFT_sendData(TFT_COLOR_Yellow);
-			}
-			b=b<<1;
-			
-		}	
-	}
-	TFT_CS_Set;
-}
-
-void TFT_printChar_Reverse(uint8_t casc,uint8_t postion_x,uint8_t postion_y)
-{
-	uint8_t i,j,b;
-	const uint8_t *p;
-	
-	TFT_CS_Reset;
-	
-	TFT_setWindow(postion_x*8,postion_y*16,postion_x*8+7,postion_y*16+15);
-	
-	TFT_index;
-	TFT_sendData(0x202);
-	TFT_data;
-	p=ascii;
-	p+=casc*16;
-	//16
-	for(j=8;j>0;j--)
-	{
-		b=*(p+j-1);
-		//8
-		for(i=0;i<16;i++)
-		{
-			if(b&0x01)
-			{
-				TFT_sendData(TFT_COLOR_Black);
-			}
-			else
-			{
-				TFT_sendData(TFT_COLOR_Yellow);
-			}
-			b=b>>1;
-			
-		}	
-	}
-	TFT_CS_Set;
-}
-
-char* swap(char *s,uint8_t sz)
-{
-    uint8_t i=0;
-    static char b[10]={0};
-    s+=sz-2;
-    for(i=0;i<sz-1;i++)
-    {
-        b[i]=*s;
-        s--;
-    }
-    s=b;
-    return s;
-}
-
-void DisplayString(char *s,uint8_t x,uint8_t y,uint8_t Reverse) {
-	char a[10],i;
-	if(Reverse)	{
-		i=0;
-		while(*s){a[i]=*s;s++;i++;}
-		s=swap(a,sizeof(a));
-	}
-	while (*s) { 
-		if(Reverse){
-			TFT_printChar_Reverse(*s,x,y);
-		} else {
-			TFT_printChar(*s,x,y);
 		}
-		//x
-		if(++y >= 30) {
-			y=0;
-			//y
-			if(++x >= 20) x = 0;
+	}
+	//Перемещение курсора по X
+	TFT_cursorX+= 5*currentFontSize+1*currentFontSize; //currentFont -> width currentFont->distance
+}
+//Печать двухбайтного кириллического символа
+void TFT_printCharUTF8(uint16_t c) { 
+	if((c & 0xFF00) == 0xD000) {
+		c -= 0xCFD0;
+	}
+	if((c & 0xFF00) == 0xD100) {
+		c -= 0xD090;
+	}
+	TFT_printChar(c);
+}
+
+//Печать строки на экране
+void TFT_print(uint8_t x, uint8_t y, char str[]) {
+	TFT_cursorX = x;
+	TFT_cursorY = y;
+	uint16_t i = 0;
+	while(str[i] != '\0') {
+		#ifdef TFT_UTF8_SUPPORT
+		uint16_t c = str[i];
+		if(c == 0xD0) {
+			c = str[i]<<8 | str[i+1];
+			c -= 0xCFD0;
+			i++;
+		} else if(c == 0xD1) {
+			c = str[i]<<8 | str[i+1];
+			c -= 0xD090;
+			i++;
 		}
-		s++;
+		TFT_printChar((uint8_t)c);
+		#endif
+		#ifndef TFT_UTF8_SUPPORT
+		TFT_printChar(str[i]);
+		#endif
+		i++;
 	}
 }
+//Установить текущий шрифт написания
+void TFT_setFont(TFT_font *font) {
+	currentFont = font;
+}
+//Установить размер шрифта
+void TFT_setFontSize(uint8_t size) {
+	currentFontSize = size;
+}
+void DisplayString(char *s,uint8_t x,uint8_t y,uint8_t Reverse){}
+	

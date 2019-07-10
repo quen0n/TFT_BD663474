@@ -18,8 +18,6 @@
 #include "main.h"
 #include <stdio.h>
 
-extern const unsigned char ascii[];
-
 //Макрос задержки в мс
 #define delay_ms(d) HAL_Delay(d)
 
@@ -33,10 +31,18 @@ extern const unsigned char ascii[];
 #define TFT_data					HAL_GPIO_WritePin(D_RS_GPIO_Port, D_RS_Pin, GPIO_PIN_SET)
 #define TFT_index					HAL_GPIO_WritePin(D_RS_GPIO_Port, D_RS_Pin, GPIO_PIN_RESET)
 
+//Включение режима поддержки UTF-8 для вывода текста
+#define TFT_UTF8_SUPPORT
+//Структура шрифта
+typedef struct {
+	const unsigned char width;
+	const unsigned char height;
+	const unsigned char distance;
+	const unsigned char *bitmap;
+} TFT_font;
 
 //Если вы хотите использовать программный SPI, то раскомментируйте это
 //#define TFT_SOFTSPI
-
 //Если вы используете аппаратный SPI, то модифицировать не обязательно
 #ifdef TFT_SOFTSPI
 #define TFT_MOSI_Set		HAL_GPIO_WritePin(SPI_MOSI_GPIO_Port, SPI_MOSI_Pin, GPIO_PIN_SET)
@@ -99,8 +105,20 @@ void TFT_fillDisplay(uint16_t color);
 #define TFT_clear() TFT_fillDisplay(TFT_COLOR_clear)
 //Установка текущей ориентации
 void TFT_setOrientation(uint8_t orientation);
+
+
+//Установить текущий шрифт написания
+void TFT_setFont(TFT_font *font);
+//Установить размер шрифта
+void TFT_setFontSize(uint8_t size);
 //Печать символа на дисплее
-void TFT_printChar(uint8_t casc, uint8_t postion_x, uint8_t postion_y);
+void TFT_printChar(char c);
+//Печать двухбайтного символа
+void TFT_printCharUTF8(uint16_t c);
+//Печать строки на дисплее
+void TFT_print(uint8_t x, uint8_t y, char str[]);
+
+
 //Выключить дисплей
 void TFT_Off(void);
 //Включить дисплей
@@ -157,10 +175,14 @@ void TFT_fillRoundRect(uint16_t x, uint16_t y, uint16_t width, uint16_t height, 
 + fillRect/circle/RoundRect/Triangle - нарисовать залитый прямоугольник/круг/скруглённый прямоугольник/треугольник
 + setColor - установить цвет кисти
 + setXY - установить координаты курсора
-printChar - напечатать символ
-setFont - установить текущий шрифт
-print - напечатать слово
++ printChar - напечатать символ
++ setFont - установить текущий шрифт
++ print - напечатать слово
++ setFontSize - размер шрифта
+поддержка разных шрифтов разных размеров (setfont в самом деле не работает, хехе)
 drawBitmap - нарисовать картинку
+Тесты добавить для символов
+Не печатать непечатаемые символы
 */
 
 //Прочее говно

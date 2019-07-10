@@ -1,7 +1,6 @@
 *
 !*/
 !.gitignore
-!Inc/asciihex8X16.h
 !Inc/BD663474.h
 !Src/BD663474.c
-!Src/BD663474_fonts.c
+!Inc/BD663474_fonts.h
