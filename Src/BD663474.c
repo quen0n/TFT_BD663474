@@ -14,7 +14,6 @@
 
 #include "BD663474.h"
 #include <stdlib.h>
-#include "BD663474_fonts.h"
 
 /* Глобальные переменные */
 //Интерфейс SPI для коммуникации с дисплеем
@@ -612,30 +611,26 @@ void TFT_printChar(char c) {
 	//Проверка печатаемости символа
 	if(((uint8_t)c < 32) || (((uint8_t)c > 127) && ((uint8_t)c < 192))) return;
 	//Проверка возможности печати на текущих координатах
-	if (TFT_cursorX >= TFT_Width-5*currentFontSize) {//currentFont -> width
-		TFT_cursorY += 8*currentFontSize; //currentFont ->height
+	if (TFT_cursorX >= TFT_Width-currentFont -> width*currentFontSize) {
+		TFT_cursorY += currentFont ->height*currentFontSize;
 		TFT_cursorX = 0;
 	}		 
-	if (TFT_cursorY >= TFT_Height - 8*currentFontSize) TFT_cursorY = 0; //currentFont -> height
+	if (TFT_cursorY >= TFT_Height - currentFont -> height*currentFontSize) TFT_cursorY = 0;
 	//Уменьшение числа символа до индекса в массиве шрифтов
-	if (c > 127) {
-			c -= 96;
-	} else c -= 32;
-	//currentFont -> width
+	if (c > 127) c -= 96; else c -= 32;
 	//Перебор байтов битмепа шрифта
-	//volatile uint8_t fontWidth = currentFont -> width;
-	for(uint8_t byteNumber = 0; byteNumber < 5; byteNumber++) {
+	for(uint8_t byteNumber = 0; byteNumber < currentFont -> width; byteNumber++) {
 		//Перебор битов байта битмепа шрифта
 		for(uint8_t bitNumber = 0; bitNumber < 8; bitNumber++) {
 			//Рисование символа
 			//Если значение бита истиное, то рисование квадратика заданного размера
-			if((currentFont -> bitmap[byteNumber+c*5] & (1<<bitNumber))) {
+			if((currentFont -> bitmap[byteNumber+c*currentFont -> width] & (1<<bitNumber))) {
 				TFT_fillRectangle(TFT_cursorX+byteNumber*currentFontSize, TFT_cursorY+bitNumber*currentFontSize, currentFontSize, currentFontSize, currentColor); 
 			}
 		}
 	}
 	//Перемещение курсора по X
-	TFT_cursorX+= 5*currentFontSize+1*currentFontSize; //currentFont -> width currentFont->distance
+	TFT_cursorX+= currentFont -> width*currentFontSize+currentFont->distance*currentFontSize; 
 }
 //Печать двухбайтного кириллического символа
 void TFT_printCharUTF8(uint16_t c) { 

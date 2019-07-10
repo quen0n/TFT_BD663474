@@ -17,6 +17,7 @@
 
 #include "main.h"
 #include <stdio.h>
+#include "BD663474_fonts.h"
 
 //Макрос задержки в мс
 #define delay_ms(d) HAL_Delay(d)
@@ -33,13 +34,6 @@
 
 //Включение режима поддержки UTF-8 для вывода текста
 #define TFT_UTF8_SUPPORT
-//Структура шрифта
-typedef struct {
-	const unsigned char width;
-	const unsigned char height;
-	const unsigned char distance;
-	const unsigned char *bitmap;
-} TFT_font;
 
 //Если вы хотите использовать программный SPI, то раскомментируйте это
 //#define TFT_SOFTSPI
@@ -168,8 +162,7 @@ void TFT_fillQuadrant(int16_t x, int16_t y, int16_t radius, uint8_t c, int16_t d
 void TFT_fillRoundRect(uint16_t x, uint16_t y, uint16_t width, uint16_t height, uint16_t radius, uint16_t color);
 
 /*TODO:
-поддержка разных шрифтов разных размеров (setfont в самом деле не работает, хехе)
-Исправить косяк с структурой шрифта
+поддержка разных шрифтов высотой более 8 пикс
 Добавить файл с примером
 */
 #endif

@@ -1,9 +1,16 @@
 #ifndef BD663474_FONTS
 #define BD663474_FONTS
 
-#include "BD663474.h"
+//Структура шрифта
+struct font {
+	const unsigned char width; 		//Длина
+	const unsigned char height;		//Высота
+	const unsigned char distance; //Дистанция между символами
+	const unsigned char *bitmap;	//Ссылка на массив
+};
+typedef struct font TFT_font;
 
-const unsigned char mono5x8_bitmap[] = {
+static const unsigned char mono5x8_bitmap[] = {
 	0x00, 0x00, 0x00, 0x00, 0x00,            // Code for char  
 	0x00, 0x00, 0x4F, 0x00, 0x00,            // Code for char !
 	0x00, 0x03, 0x00, 0x03, 0x00,            // Code for char "
@@ -168,6 +175,6 @@ const unsigned char mono5x8_bitmap[] = {
 	0x48, 0x34, 0x14, 0x14, 0x7C,            // Code for char я
 };
 
-TFT_font mono5x8 = {5,8,1,mono5x8_bitmap};
+static TFT_font mono5x8 = {5,8,1,mono5x8_bitmap};
 
 #endif
