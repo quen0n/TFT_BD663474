@@ -602,14 +602,18 @@ void TFT_test(void) {
 	TFT_clear();
 	TFT_setFontSize(2);
 	starttime = HAL_GetTick();
-	for(uint8_t i = 32; i < 128; i++) TFT_printCharUTF8(i); //Печать латинских и обычных символов
-	for(uint16_t i = 0xD090; i < 0xD0D0; i++) TFT_printCharUTF8(i); //Печать кириллицы
+	TFT_setCursor(0,0);
+	for(uint8_t i = 1; i != 0; i++) TFT_printCharUTF8(i); //Печать латинских и обычных символов
+	//for(uint8_t i = 32; i < 128; i++) TFT_printCharUTF8(i); //Печать латинских и обычных символов
+	//for(uint16_t i = 0xD090; i < 0xD0D0; i++) TFT_printCharUTF8(i); //Печать кириллицы
 	sprintf(buff, "%d", HAL_GetTick()-starttime);
 	TFT_print(0,TFT_Height-1-8*currentFontSize,buff);
 	HAL_Delay(1500);
 }
 //Печать символа на экране
 void TFT_printChar(char c) {
+	//Проверка печатаемости символа
+	if(((uint8_t)c < 32) || (((uint8_t)c > 127) && ((uint8_t)c < 192))) return;
 	//Проверка возможности печати на текущих координатах
 	if (TFT_cursorX >= TFT_Width-5*currentFontSize) {//currentFont -> width
 		TFT_cursorY += 8*currentFontSize; //currentFont ->height
