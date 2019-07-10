@@ -562,7 +562,7 @@ void TFT_test(void) {
 
 void TFT_printChar(uint8_t casc, uint8_t postion_x, uint8_t postion_y) {
 	uint8_t i,j,b;
-	uint8_t *p;
+	const uint8_t *p;
 	
 	TFT_CS_Reset;
 
@@ -598,7 +598,7 @@ void TFT_printChar(uint8_t casc, uint8_t postion_x, uint8_t postion_y) {
 void TFT_printChar_Reverse(uint8_t casc,uint8_t postion_x,uint8_t postion_y)
 {
 	uint8_t i,j,b;
-	uint8_t *p;
+	const uint8_t *p;
 	
 	TFT_CS_Reset;
 	
