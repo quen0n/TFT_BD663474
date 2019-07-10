@@ -117,8 +117,8 @@ void TFT_printChar(char c);
 void TFT_printCharUTF8(uint16_t c);
 //Печать строки на дисплее
 void TFT_print(uint8_t x, uint8_t y, char str[]);
-
-
+//Нарисовать картинку на дисплее
+void TFT_drawImage(uint16_t width, uint16_t height, const uint16_t *bitmap);
 //Выключить дисплей
 void TFT_Off(void);
 //Включить дисплей
@@ -129,6 +129,8 @@ void TFT_setColor(uint16_t color);
 uint16_t TFT_getColor(void);
 //Установить рабочую область от точки (x0,y0) до (x1, y1)
 void TFT_setWindow(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1);
+//Установить координаты курсора по X и Y
+void TFT_setCursor(uint16_t X, uint16_t Y);
 //Получить текущее положение курсора по X
 uint16_t TFT_getCursorX(void);
 //Получить текущее положение курсора по Y
@@ -167,7 +169,6 @@ void TFT_fillRoundRect(uint16_t x, uint16_t y, uint16_t width, uint16_t height, 
 
 /*TODO:
 поддержка разных шрифтов разных размеров (setfont в самом деле не работает, хехе)
-drawBitmap - нарисовать картинку
 Исправить косяк с структурой шрифта
 Добавить файл с примером
 */

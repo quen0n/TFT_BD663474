@@ -133,9 +133,6 @@ void TFT_fillDisplay(uint16_t color) {
 	
 	TFT_setWindow(0,0, TFT_Width-1, TFT_Height-1);
 	
-	TFT_sendCmd(0x200,0x0000);
-	TFT_sendCmd(0x201,0x0000);
-
 	TFT_index;
 	TFT_sendData(0x202);
 	TFT_data;
@@ -683,4 +680,19 @@ void TFT_setFont(TFT_font *font) {
 //Установить размер шрифта
 void TFT_setFontSize(uint8_t size) {
 	currentFontSize = size;
+}
+//Нарисовать картинку на дисплее
+void TFT_drawImage(uint16_t width, uint16_t height, const uint16_t *bitmap) {
+	TFT_CS_Reset;	//Общение на шине именно с дисплеем
+	
+	TFT_setWindow(TFT_cursorX,TFT_cursorY, TFT_cursorX+width-1, TFT_cursorY+height-1);
+
+	TFT_index;
+	TFT_sendData(0x202);
+	TFT_data;
+	
+	for (uint32_t i = 0; i < width*height; i++) {
+		TFT_sendData(bitmap[i]);
+	}
+	TFT_CS_Set; //Поднятие CS, т.к. общение с дисплеем закончено
 }
