@@ -300,6 +300,9 @@ void TFT_drawPixel(uint16_t x, uint16_t y, uint16_t color) {
 	TFT_data;							//Отправка данных
 	TFT_sendData(color);	//Указание цвета закрашивания пикселя
 	TFT_CS_Set;						//Окончание общения с дисплеем
+	//Обновление положения курсора
+	TFT_cursorX = x+1;
+	TFT_cursorY = y;
 }
 //Нарисовать линию начиная с x0,y0, заканчивая x1,y1 указанным цветом
 void TFT_drawLine(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint8_t size, uint16_t color) {
@@ -319,6 +322,9 @@ void TFT_drawLine(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint8_t si
 			err += dx; y0 += sy;
 		}
 	}
+	//Обновление положения курсора
+	TFT_cursorX = x1+1;
+	TFT_cursorY = y1;
 }
 //Нарисовать горизонтальную линию начиная с точки (x:y) длиной len указанным цветом
 void TFT_drawLineHorizontal(uint16_t x, uint16_t y, uint16_t len, uint8_t size, uint16_t color) {
@@ -329,6 +335,9 @@ void TFT_drawLineHorizontal(uint16_t x, uint16_t y, uint16_t len, uint8_t size, 
 	TFT_data;									//Отправка данных
 	for(uint16_t i = 0; i < len*size; i++) TFT_sendData(color); //Рисование линии указанным цветом
 	TFT_CS_Set;								//Окончание общения с дисплеем
+	//Обновление положения курсора
+	TFT_cursorX = x+size+1;
+	TFT_cursorY = y;
 }
 //Нарисовать вертикальную линию начиная с точки (x:y) длиной len указанным цветом
 void TFT_drawLineVertical(uint16_t x, uint16_t y, uint16_t len, uint8_t size, uint16_t color) {
@@ -339,6 +348,9 @@ void TFT_drawLineVertical(uint16_t x, uint16_t y, uint16_t len, uint8_t size, ui
 	TFT_data;									//Отправка данных
 	for(uint16_t i = 0; i < len*size; i++) TFT_sendData(color); //Рисование линии указанным цветом
 	TFT_CS_Set;								//Окончание общения с дисплеем
+	//Обновление положения курсора
+	TFT_cursorX = x+1;
+	TFT_cursorY = y+len;
 }
 //Нарисовать окружность с центром в координате (x,y), радиусом radius и указанным цветом
 void TFT_drawCircle(uint16_t x, uint16_t y, uint16_t radius, uint8_t size, uint16_t color) {
@@ -362,6 +374,9 @@ void TFT_drawCircle(uint16_t x, uint16_t y, uint16_t radius, uint8_t size, uint1
 		 }
 		 delta += 2 * (++x_ - y_--);
 	 }
+	//Обновление положения курсора
+	TFT_cursorX = x;
+	TFT_cursorY = y;
 }
 //Нарисовать прямоугольник начиная с точки (x:y), с указанной шириной, висотой, шириной линии и цветом
 void TFT_drawRectangle(uint16_t x, uint16_t y, uint16_t width, uint16_t height, uint8_t size, uint16_t color) {
@@ -410,6 +425,9 @@ void TFT_fillCircle(uint16_t x, uint16_t y, uint16_t radius, uint16_t color) {
 		 }
 		 delta += 2 * (++x_ - y_--);
 	 }
+	 //Обновление положения курсора
+	TFT_cursorX = x;
+	TFT_cursorY = y;
 }
 //Функция для рисования четверти круга с центром (x:y), с указанным радиусом, фазой и цветом
 void TFT_drawQuadrant(int16_t x, int16_t y, int16_t radius, uint8_t c, uint8_t size, uint16_t color) {
@@ -458,6 +476,9 @@ void TFT_drawRoundRect(uint16_t x, uint16_t y, uint16_t width, uint16_t height, 
   TFT_drawQuadrant(x+width-radius-size, y+radius, radius, 2, size, color);
   TFT_drawQuadrant(x+width-radius-size, y+height-radius-size, radius,  4, size, color);
   TFT_drawQuadrant(x+radius, y+height-radius-size, radius, 8, size, color);
+	//Обновление положения курсора
+	TFT_cursorX = x+width+1;
+	TFT_cursorY = y+height;
 }
 //Функция для закрашивания четверти круга с центром (x:y), с указанным радиусом, фазой и цветом
 void TFT_fillQuadrant(int16_t x, int16_t y, int16_t radius, uint8_t c, int16_t delta, uint16_t color) {
@@ -494,6 +515,9 @@ void TFT_fillRoundRect(uint16_t x, uint16_t y, uint16_t width, uint16_t height, 
 
   TFT_fillQuadrant(x+width-radius-1, y+radius, radius, 1, height-2*radius-1, color);
   TFT_fillQuadrant(x+radius, y+radius, radius, 2, height-2*radius-1, color);
+	//Обновление положения курсора
+	TFT_cursorX = x+width+1;
+	TFT_cursorY = y+height;
 }
 //Функция тестирования работы дисплея
 void TFT_test(void) {

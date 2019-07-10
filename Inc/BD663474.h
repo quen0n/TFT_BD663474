@@ -156,9 +156,9 @@ void TFT_fillRoundRect(uint16_t x, uint16_t y, uint16_t width, uint16_t height, 
 + on/off - включить/выключить дисплей
 + fillRect/circle/RoundRect/Triangle - нарисовать залитый прямоугольник/круг/скруглённый прямоугольник/треугольник
 + setColor - установить цвет кисти
-setXY - установить координаты курсора
-setFont - установить текущий шрифт
++ setXY - установить координаты курсора
 printChar - напечатать символ
+setFont - установить текущий шрифт
 print - напечатать слово
 drawBitmap - нарисовать картинку
 */
