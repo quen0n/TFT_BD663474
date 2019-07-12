@@ -147,8 +147,8 @@ void TFT_sendData(uint16_t data) {
 	//Отправка данных по SPI
 	#ifndef TFT_SOFTSPI
 	//Буффер данных для отправки
-	uint8_t buff[2] = {data>>8, (uint8_t)data};
-	HAL_SPI_Transmit(_displaySPI, (uint8_t *)buff, 2, 0xFF);
+	uint16_t buff[1] = {data};
+	HAL_SPI_Transmit(_displaySPI, (uint8_t *)buff, 1, 0xFF);
 	#endif
 	#ifdef TFT_SOFTSPI
 	uint16_t mask = 32768;
