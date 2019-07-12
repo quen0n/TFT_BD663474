@@ -608,6 +608,17 @@ void TFT_test(void) {
 }
 //Печать символа на экране
 void TFT_printChar(char c) {
+	#ifdef TFT_UTF8_SUPPORT
+	static char highByte = 0;
+ 	if (highByte) {
+		if (highByte ==  0xD0) c = ((uint16_t) highByte<<8 | c) - 0xCFD0;
+		if (highByte ==  0xD1) c = ((uint16_t) highByte<<8 | c) - 0xD090;
+		highByte = 0;
+	} else if(c == 0xD0 || c == 0xD1) {
+		highByte = c; 
+		return;
+	}
+	#endif
 	//Проверка печатаемости символа
 	if(((uint8_t)c < 32) || (((uint8_t)c > 127) && ((uint8_t)c < 192))) return;
 	//Проверка возможности печати на текущих координатах
@@ -649,22 +660,7 @@ void TFT_print(uint8_t x, uint8_t y, char str[]) {
 	TFT_cursorY = y;
 	uint16_t i = 0;
 	while(str[i] != '\0') {
-		#ifdef TFT_UTF8_SUPPORT
-		uint16_t c = str[i];
-		if(c == 0xD0) {
-			c = str[i]<<8 | str[i+1];
-			c -= 0xCFD0;
-			i++;
-		} else if(c == 0xD1) {
-			c = str[i]<<8 | str[i+1];
-			c -= 0xD090;
-			i++;
-		}
-		TFT_printChar((uint8_t)c);
-		#endif
-		#ifndef TFT_UTF8_SUPPORT
 		TFT_printChar(str[i]);
-		#endif
 		i++;
 	}
 }

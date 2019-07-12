@@ -1,7 +1,7 @@
 /*
 *========================================================================================================
 *
-* File                : BD663474.C
+* File                : BD663474.h
 * Hardware Environment: STM32F446
 * Build Environment   : Keil uVision 5
 * Version             : 1.0
@@ -163,7 +163,8 @@ void TFT_fillRoundRect(uint16_t x, uint16_t y, uint16_t width, uint16_t height, 
 
 /*TODO:
 поддержка разных шрифтов высотой более 8 пикс
-Добавить файл с примером
 Добавить функцию рисования закрашенных треугольников
+fillRectangle и clear не инкрементирует курсор
+заменить табы на пробелы
 */
 #endif
