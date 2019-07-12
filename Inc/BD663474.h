@@ -7,7 +7,7 @@
 * Version             : 1.0
 * By                  : Victor Nikitchuk & WaveShare Indian programmers
 *
-*	Основано на примере для Open16F877A. https://www.waveshare.com/wiki/File:Open16F877A-Demo.7z
+*    Основано на примере для Open16F877A. https://www.waveshare.com/wiki/File:Open16F877A-Demo.7z
 *
 *========================================================================================================
 */
@@ -23,14 +23,14 @@
 #define delay_ms(d) HAL_Delay(d)
 
 /* Макросы взаимодействия с портами ввода/вывода */
-#define TFT_RESET_Reset		HAL_GPIO_WritePin(RESET_GPIO_Port, RESET_Pin, GPIO_PIN_RESET)  
-#define TFT_RESET_Set			HAL_GPIO_WritePin(RESET_GPIO_Port, RESET_Pin, GPIO_PIN_SET)
+#define TFT_RESET_Reset         HAL_GPIO_WritePin(RESET_GPIO_Port, RESET_Pin, GPIO_PIN_RESET)  
+#define TFT_RESET_Set           HAL_GPIO_WritePin(RESET_GPIO_Port, RESET_Pin, GPIO_PIN_SET)
 //Опускание/поднятие логического уровня CS дисплея
-#define TFT_CS_Reset			HAL_GPIO_WritePin(D_CS_GPIO_Port, D_CS_Pin, GPIO_PIN_RESET)
-#define TFT_CS_Set				HAL_GPIO_WritePin(D_CS_GPIO_Port, D_CS_Pin, GPIO_PIN_SET)
+#define TFT_CS_Reset            HAL_GPIO_WritePin(D_CS_GPIO_Port, D_CS_Pin, GPIO_PIN_RESET)
+#define TFT_CS_Set              HAL_GPIO_WritePin(D_CS_GPIO_Port, D_CS_Pin, GPIO_PIN_SET)
 //Передача данных/команды в дисплей
-#define TFT_data					HAL_GPIO_WritePin(D_RS_GPIO_Port, D_RS_Pin, GPIO_PIN_SET)
-#define TFT_index					HAL_GPIO_WritePin(D_RS_GPIO_Port, D_RS_Pin, GPIO_PIN_RESET)
+#define TFT_data                HAL_GPIO_WritePin(D_RS_GPIO_Port, D_RS_Pin, GPIO_PIN_SET)
+#define TFT_index               HAL_GPIO_WritePin(D_RS_GPIO_Port, D_RS_Pin, GPIO_PIN_RESET)
 
 //Включение режима поддержки UTF-8 для вывода текста
 #define TFT_UTF8_SUPPORT
@@ -39,43 +39,43 @@
 //#define TFT_SOFTSPI
 //Если вы используете аппаратный SPI, то модифицировать не обязательно
 #ifdef TFT_SOFTSPI
-#define TFT_MOSI_Set		HAL_GPIO_WritePin(SPI_MOSI_GPIO_Port, SPI_MOSI_Pin, GPIO_PIN_SET)
-#define TFT_MOSI_Reset	HAL_GPIO_WritePin(SPI_MOSI_GPIO_Port, SPI_MOSI_Pin, GPIO_PIN_RESET)
-#define TFT_SCK_Set			HAL_GPIO_WritePin(SPI_SCK_GPIO_Port, SPI_SCK_Pin, GPIO_PIN_SET)
-#define TFT_SCK_Reset		HAL_GPIO_WritePin(SPI_SCK_GPIO_Port, SPI_SCK_Pin, GPIO_PIN_RESET)
+#define TFT_MOSI_Set            HAL_GPIO_WritePin(SPI_MOSI_GPIO_Port, SPI_MOSI_Pin, GPIO_PIN_SET)
+#define TFT_MOSI_Reset          HAL_GPIO_WritePin(SPI_MOSI_GPIO_Port, SPI_MOSI_Pin, GPIO_PIN_RESET)
+#define TFT_SCK_Set             HAL_GPIO_WritePin(SPI_SCK_GPIO_Port, SPI_SCK_Pin, GPIO_PIN_SET)
+#define TFT_SCK_Reset           HAL_GPIO_WritePin(SPI_SCK_GPIO_Port, SPI_SCK_Pin, GPIO_PIN_RESET)
 #endif
 
 //Преобразование RGB в 16-ти битный формат 565
-#define	TFT_RGB(R, G, B)	(((B >> 3)) | ((G >> 2) << 5) | ((R >> 3) << 11))
+#define TFT_RGB(R, G, B) (((B >> 3)) | ((G >> 2) << 5) | ((R >> 3) << 11))
 //Цвета
 enum COLOR{
-	TFT_COLOR_Black 					= TFT_RGB(0, 0, 0),
-	TFT_COLOR_Gray						= TFT_RGB(24, 24, 24),
-	TFT_COLOR_Silver					= TFT_RGB(80, 80, 80),
-	TFT_COLOR_White						= TFT_RGB(255, 255, 255),
-	TFT_COLOR_Fuchsia					= TFT_RGB(255, 0, 255),
-	TFT_COLOR_Purple					= TFT_RGB(64, 0, 64),
-	TFT_COLOR_Red							= TFT_RGB(255, 0, 0),
-	TFT_COLOR_Maroon					= TFT_RGB(64, 0, 0),
-	TFT_COLOR_Yellow					= TFT_RGB(255, 255, 0),
-	TFT_COLOR_Orange					= TFT_RGB(128, 64, 0),
-	TFT_COLOR_Lime						= TFT_RGB(0, 255, 0),
-	TFT_COLOR_Green						= TFT_RGB(0, 64, 0),
-	TFT_COLOR_Aqua						= TFT_RGB(0, 255, 255),
-	TFT_COLOR_Teal						= TFT_RGB(0, 64, 64),
-	TFT_COLOR_Blue						= TFT_RGB(0, 0, 255),
-	TFT_COLOR_Navy						= TFT_RGB(0, 0, 32),
-	TFT_COLOR_clear 					= TFT_COLOR_Black,
+    TFT_COLOR_Black             = TFT_RGB(0, 0, 0),
+    TFT_COLOR_Gray              = TFT_RGB(24, 24, 24),
+    TFT_COLOR_Silver            = TFT_RGB(80, 80, 80),
+    TFT_COLOR_White             = TFT_RGB(255, 255, 255),
+    TFT_COLOR_Fuchsia           = TFT_RGB(255, 0, 255),
+    TFT_COLOR_Purple            = TFT_RGB(64, 0, 64),
+    TFT_COLOR_Red               = TFT_RGB(255, 0, 0),
+    TFT_COLOR_Maroon            = TFT_RGB(64, 0, 0),
+    TFT_COLOR_Yellow            = TFT_RGB(255, 255, 0),
+    TFT_COLOR_Orange            = TFT_RGB(128, 64, 0),
+    TFT_COLOR_Lime              = TFT_RGB(0, 255, 0),
+    TFT_COLOR_Green             = TFT_RGB(0, 64, 0),
+    TFT_COLOR_Aqua              = TFT_RGB(0, 255, 255),
+    TFT_COLOR_Teal              = TFT_RGB(0, 64, 64),
+    TFT_COLOR_Blue              = TFT_RGB(0, 0, 255),
+    TFT_COLOR_Navy              = TFT_RGB(0, 0, 32),
+    TFT_COLOR_clear             = TFT_COLOR_Black,
 };
 //Текущий цвет, который установлен функцией TFT_setColor()
 #define TFT_COLOR_CURRENT TFT_getColor()
 
 //Ориентации дисплея
 enum ORIENTATION {
-	TFT_ORIENT_PORTRAIT,			//Портретная ориентация (верх со стороны 1-го пина)
-	TFT_ORIENT_LANDSCAPE_180,	//Альбомная ориентация (левый верхний угол со стороны шлейфа тачскрина)
-	TFT_ORIENT_PORTRAIT_180,	//Портретная ориентация (верх со стороны 40-го пина)
-	TFT_ORIENT_LANDSCAPE, 		//Альбомная ориентация (левый верхний угол со стороны вывода №1)
+    TFT_ORIENT_PORTRAIT,            //Портретная ориентация (верх со стороны 1-го пина)
+    TFT_ORIENT_LANDSCAPE_180,       //Альбомная ориентация (левый верхний угол со стороны шлейфа тачскрина)
+    TFT_ORIENT_PORTRAIT_180,        //Портретная ориентация (верх со стороны 40-го пина)
+    TFT_ORIENT_LANDSCAPE,           //Альбомная ориентация (левый верхний угол со стороны вывода №1)
 };
 
 
@@ -99,7 +99,6 @@ void TFT_fillDisplay(uint16_t color);
 #define TFT_clear() TFT_fillDisplay(TFT_COLOR_clear)
 //Установка текущей ориентации
 void TFT_setOrientation(uint8_t orientation);
-
 
 //Установить текущий шрифт написания
 void TFT_setFont(TFT_font *font);
@@ -164,7 +163,5 @@ void TFT_fillRoundRect(uint16_t x, uint16_t y, uint16_t width, uint16_t height, 
 /*TODO:
 поддержка разных шрифтов высотой более 8 пикс
 Добавить функцию рисования закрашенных треугольников
-fillRectangle и clear не инкрементирует курсор
-заменить табы на пробелы
 */
 #endif
