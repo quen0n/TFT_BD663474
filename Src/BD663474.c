@@ -32,6 +32,8 @@ uint16_t TFT_cursorX, TFT_cursorY;
 TFT_font *currentFont = &mono5x8;
 //Текущий размер шрифта
 uint8_t currentFontSize = 1;
+//Цвет фона текста
+uint16_t textBackColor = TFT_COLOR_none; //По умолчанию фон выключен
 //Аппаратная перезагрузка дисплея
 void TFT_reset(void) {
     TFT_RESET_Reset;
@@ -625,6 +627,10 @@ void TFT_printChar(char c) {
     if (TFT_cursorY >= TFT_Height - currentFont -> height*currentFontSize) TFT_cursorY = 0;
     //Уменьшение числа символа до индекса в массиве шрифтов
     if (c > 127) c -= 96; else c -= 32;
+    //Заливка фона цифры если включен фон
+    if(textBackColor != TFT_COLOR_none) {
+        TFT_fillRectangle(TFT_cursorX, TFT_cursorY, currentFontSize*currentFont -> width+currentFontSize*currentFont->distance, currentFontSize*currentFont -> height, textBackColor); 
+    }
     //Перебор байтов битмепа шрифта
     for(uint8_t byteNumber = 0; byteNumber < currentFont -> width; byteNumber++) {
         //Перебор битов байта битмепа шрифта
@@ -682,4 +688,8 @@ void TFT_drawImage(uint16_t width, uint16_t height, const uint16_t *bitmap) {
         TFT_sendData(bitmap[i]);
     }
     TFT_CS_Set; //Поднятие CS, т.к. общение с дисплеем закончено
+}
+//Установить цвет фона текста. TFT_COLOR_none - прозрачный
+void TFT_setTextBackColor(uint16_t color) {
+    textBackColor = color;
 }

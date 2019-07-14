@@ -66,6 +66,7 @@ enum COLOR{
     TFT_COLOR_Blue              = TFT_RGB(0, 0, 255),
     TFT_COLOR_Navy              = TFT_RGB(0, 0, 32),
     TFT_COLOR_clear             = TFT_COLOR_Black,
+    TFT_COLOR_none              = 1, //едва синий, такой цвет не должен использоваться, по идее
 };
 //Текущий цвет, который установлен функцией TFT_setColor()
 #define TFT_COLOR_CURRENT TFT_getColor()
@@ -128,6 +129,8 @@ void TFT_setCursor(uint16_t X, uint16_t Y);
 uint16_t TFT_getCursorX(void);
 //Получить текущее положение курсора по Y
 uint16_t TFT_getCursorY(void);
+//Установить цвет фона текста. TFT_COLOR_none - прозрачный
+void TFT_setTextBackColor(uint16_t color);
 
 //Функция тестирования работы дисплея
 void TFT_test(void);
