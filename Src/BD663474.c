@@ -49,10 +49,11 @@ void TFT_init(uint8_t orientation, SPI_HandleTypeDef *displaySPI) {
 #ifdef TFT_SOFTSPI
 void TFT_init(uint8_t orientation) {
 #endif
-    //Общение на шине именно с дисплеем
-    TFT_CS_Reset;
+    TFT_CS_Set;
     //Аппаратная перезагрузка дисплея
     TFT_reset();
+    //Общение на шине именно с дисплеем
+    TFT_CS_Reset;
     
     TFT_sendCmd(0x000,0x0001); //Запуск осциллятора
     delay_ms(10);
