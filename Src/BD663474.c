@@ -628,18 +628,44 @@ void TFT_printChar(char c) {
     if (TFT_cursorY >= TFT_Height - currentFont -> height*currentFontSize) TFT_cursorY = 0;
     //Уменьшение числа символа до индекса в массиве шрифтов
     if (c > 127) c -= 96; else c -= 32;
-    //Заливка фона цифры если включен фон
+    //81
+    //Если включен фон, то сперва рисование в буфер, а потом на экран. Иначе медленно и мерцающе получится
     if(textBackColor != TFT_COLOR_none) {
-        TFT_fillRectangle(TFT_cursorX, TFT_cursorY, currentFontSize*currentFont -> width+currentFontSize*currentFont->distance, currentFontSize*currentFont -> height, textBackColor); 
-    }
-    //Перебор байтов битмепа шрифта
-    for(uint8_t byteNumber = 0; byteNumber < currentFont -> width; byteNumber++) {
-        //Перебор битов байта битмепа шрифта
-        for(uint8_t bitNumber = 0; bitNumber < 8; bitNumber++) {
-            //Рисование символа
-            //Если значение бита истиное, то рисование квадратика заданного размера
-            if((currentFont -> bitmap[byteNumber+c*currentFont -> width] & (1<<bitNumber))) {
-                TFT_fillRectangle(TFT_cursorX+byteNumber*currentFontSize, TFT_cursorY+bitNumber*currentFontSize, currentFontSize, currentFontSize, currentColor); 
+        uint32_t size = (currentFont -> width+currentFont ->distance)*currentFontSize*currentFont -> height*currentFontSize;
+        uint16_t buff[size];
+        //Заполнение буфера фоном
+        for(uint16_t i = 0; i < size; i++) {
+            buff[i] = textBackColor;
+        }
+        //Перебор байтов битмепа шрифта
+        for(uint8_t byteNumber = 0; byteNumber < currentFont -> width; byteNumber++) {
+            //Перебор битов байта битмепа шрифта
+            for(uint8_t bitNumber = 0; bitNumber < 8; bitNumber++) {
+                                        //buff[byteNumber+bitNumber*currentFont -> width*currentFontSize+i] = currentColor;
+                //Рисование символа
+                //Если значение бита истиное, то рисование квадратика заданного размера
+                if((currentFont -> bitmap[byteNumber+c*currentFont -> width] & (1<<bitNumber))) {
+                    for(uint8_t x = 0; x < currentFontSize; x++) {
+                        for(uint8_t y = 0; y < currentFontSize; y++) {
+                            //   [             y в массиве                    ]  [ y в шрифте                ] 
+                            buff[((currentFont -> width+currentFont ->distance)*currentFontSize)*(bitNumber*currentFontSize+y) + x+byteNumber*currentFontSize ] = currentColor;
+                        }
+                    }
+                }
+            }
+        }/**/
+        //TFT_setWindow(TFT_cursorX, TFT_cursorY, TFT_cursorX+currentFont -> width-1, currentFont -> height-1);
+        TFT_drawImage((currentFont -> width+currentFont ->distance)*currentFontSize, currentFont -> height*currentFontSize, buff);
+    } else {
+        //Перебор байтов битмепа шрифта
+        for(uint8_t byteNumber = 0; byteNumber < currentFont -> width; byteNumber++) {
+            //Перебор битов байта битмепа шрифта
+            for(uint8_t bitNumber = 0; bitNumber < 8; bitNumber++) {
+                //Рисование символа
+                //Если значение бита истиное, то рисование квадратика заданного размера
+                if((currentFont -> bitmap[byteNumber+c*currentFont -> width] & (1<<bitNumber))) {
+                    TFT_fillRectangle(TFT_cursorX+byteNumber*currentFontSize, TFT_cursorY+bitNumber*currentFontSize, currentFontSize, currentFontSize, currentColor); 
+                }
             }
         }
     }
